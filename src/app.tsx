@@ -1,6 +1,7 @@
 import * as Y from 'yjs';
 import { CHARACTERS, CONTACTS } from './data'
-import { ContactList } from './contacts';
+import { CharacterList, CharacterSheet } from './character';
+import { Route, Switch } from 'wouter';
 
 export const App = () => {
   const doc = new Y.Doc();
@@ -17,9 +18,22 @@ export const App = () => {
   char2.set('name', 'Matti Meikäläinen');
   char2.set('workName', 'Jokapaikanhöylä');
 
-  return <CONTACTS.Provider value={doc.getMap('contacts')}>
-    <CHARACTERS.Provider value={doc.getMap('characters')}>
-      <ContactList owner={1} />
-    </CHARACTERS.Provider>
-  </CONTACTS.Provider>;
+  // <h1 className="text-4xl p-2">
+  //   <input placeholder="Pelin nimi" value={view.name} onChange={(event) => self.set('name', event.target.value)} className="outline-none max-w-md" />
+  // </h1>
+
+  return <div className="max-w-5xl ml-auto mr-auto">
+      <CONTACTS.Provider value={doc.getMap('contacts')}>
+        <CHARACTERS.Provider value={doc.getMap('characters')}>
+          <Switch>
+            <Route path="/characters/:id">
+              {({id}) => <CharacterSheet id={parseInt(id)} />}
+            </Route>
+            <Route>
+              <CharacterList />
+            </Route>
+          </Switch>
+        </CHARACTERS.Provider>
+      </CONTACTS.Provider>
+    </div>
 }

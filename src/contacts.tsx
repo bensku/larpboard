@@ -3,10 +3,11 @@ import * as Y from "yjs";
 import { CHARACTERS, CONTACTS } from "./data";
 import { Popover, PopoverContent, PopoverTrigger } from "./components/ui/popover";
 import { Button } from "./components/ui/button";
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown, CircleXIcon } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./components/ui/command";
-import { Textarea } from "./components/ui/textarea";
 import { useShallowY, useY } from "./yjs-hooks/useY";
+import { TextEditor } from "./editor";
+import { Link } from "wouter";
 
 export const ContactList = ({ owner }: { owner: number }) => {
   // Only re-render when contacts are added/deleted
@@ -14,8 +15,11 @@ export const ContactList = ({ owner }: { owner: number }) => {
   const contactsCtx = useContext(CONTACTS);
   const allContacts = useShallowY(contactsCtx);
 
+  const characters = useContext(CHARACTERS);
+  const self = useShallowY(characters.get(`${owner}`)!);
+
   // Collect relevant contacts to a list
-  const contacts: { id: string; contact: Y.Map<string>; selfFirst: boolean }[] = [];
+  const contacts: { id: string; contact: Y.Map<string | Y.XmlFragment>; selfFirst: boolean }[] = [];
   const contactMap: Map<number, typeof contacts[0]> = new Map();
   for (const id of Object.keys(allContacts)) {
     const idParts = parseId(id);
@@ -47,48 +51,78 @@ export const ContactList = ({ owner }: { owner: number }) => {
   
   const createContact = (otherId: number) => {
     const id = newContactId(owner, otherId);
-    const contact = new Y.Map<string>();
+    const contact = new Y.Map<string | Y.XmlFragment>();
     contactsCtx.set(id, contact);
 
     const selfPrefix = otherId < owner ? "a" : "b";
     const otherPrefix = otherId < owner ? "b" : "a";
     contact.set(`${selfPrefix}/id`, `${owner}`);
+    contact.set(`${selfPrefix}/desc`, new Y.XmlFragment());
     contact.set(`${otherPrefix}/id`, `${otherId}`);
+    contact.set(`${otherPrefix}/desc`, new Y.XmlFragment());
   }
 
+  const destroyContact = (id: string) => {
+    contactsCtx.delete(id);
+  };
+
+  const selfName = self.name ? self.name : self.workName;
   return (
     <div>
-      <h2>Contacts</h2>
+      <h2 className="text-2xl p-2">Kontaktit</h2>
       <CreateContact characters={availableContacts} createContact={createContact} />
       {contacts.map((entry) => (
-        <Contact {...entry} key={entry.id} />
+        <Contact selfName={selfName} {...entry} key={entry.id} destroy={() => destroyContact(entry.id)} />
       ))}
     </div>
   );
 };
 
 const Contact = ({
+  selfName,
   contact,
   selfFirst,
+  destroy
 }: {
-  contact: Y.Map<string>;
+  selfName: string;
+  contact: Y.Map<string | Y.XmlFragment>;
   selfFirst: boolean;
+  destroy: () => void;
 }) => {
-  const data = useY(contact);
   const selfPrefix = selfFirst ? "a" : "b";
   const otherPrefix = selfFirst ? "b" : "a";
 
   const characters = useContext(CHARACTERS);
-  const otherId = data[`${otherPrefix}/id`];
+  const otherId = contact.get(`${otherPrefix}/id`) as string;
   const other = useY(characters.get(otherId)!);
+
+  const confirmDestroy = () => {
+    const ok = confirm(`Haluatko varmasti poistaa kontaktin ${selfName} - ${other.name} MOLEMMILTA hahmoilta?`);
+    if (ok) {
+      destroy();
+    }
+  };
 
   return (
     <div>
-      <h3>
-        {other.name} ({other.workName})
+      <h3 className="text-xl">
+        <Link href={`/characters/${otherId}`}>
+          {other.name} (<span className="text-gray-600">{other.workName}</span>)
+        </Link>
       </h3>
-      <Textarea defaultValue={data[`${selfPrefix}/desc`] ?? ""} />
-      <Textarea defaultValue={data[`${otherPrefix}/desc`] ?? ""} />
+      <div className="flex flex-row">
+        <div className="flex flex-col flex-grow">
+          <h4>{selfName} -&gt; {other.name}</h4>
+          <TextEditor fragment={contact.get(`${selfPrefix}/desc`) as Y.XmlFragment} />
+        </div>
+        <div className="flex flex-col flex-grow">
+          <h4>{other.name} -&gt; {selfName}</h4>
+          <TextEditor fragment={contact.get(`${otherPrefix}/desc`) as Y.XmlFragment} />
+        </div>
+        <Button variant="ghost" size="icon" onClick={confirmDestroy}>
+          <CircleXIcon />
+        </Button>
+      </div>
     </div>
   );
 };
@@ -113,7 +147,7 @@ const CreateContact = ({characters, createContact}: {characters: {id: number, na
         <Command>
           <CommandInput placeholder="Etsi hahmoja..." />
           <CommandList>
-            <CommandEmpty>Kaikkiin hahmoihin jo kontaktit!</CommandEmpty>
+            <CommandEmpty>Hahmoja ei löytynyt.</CommandEmpty>
             <CommandGroup>
               {characters.map((character) => (
                 <CommandItem
