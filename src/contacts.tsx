@@ -3,13 +3,15 @@ import * as Y from "yjs";
 import { CHARACTERS, CONTACTS } from "./data";
 import { Popover, PopoverContent, PopoverTrigger } from "./components/ui/popover";
 import { Button } from "./components/ui/button";
-import { ChevronsUpDown, CircleXIcon } from "lucide-react";
+import { ChevronsUpDown, CircleXIcon, TriangleAlertIcon } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./components/ui/command";
 import { useShallowY, useY } from "./yjs-hooks/useY";
 import { TextEditor } from "./editor";
 import { Link } from "wouter";
+import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
+import { navigate } from "wouter/use-browser-location";
 
-export const ContactList = ({ owner }: { owner: number }) => {
+export const ContactList = ({ owner, groupContacts }: { owner: number; groupContacts: Set<number>; }) => {
   // Only re-render when contacts are added/deleted
   // (each Contact observes changes to it separately)
   const contactsCtx = useContext(CONTACTS);
@@ -33,7 +35,14 @@ export const ContactList = ({ owner }: { owner: number }) => {
       contactMap.set(idParts[0] == owner ? idParts[1] : idParts[0], contact);
     }
   }
-
+  
+  // Make sure we have contacts to all characters we share groups with (however brief they are)
+  const missingGroupContacts: number[] = [];
+  for (const charId of groupContacts) {
+    if (!contactMap.has(charId)) {
+      missingGroupContacts.push(charId);
+    }
+  }
   // TODO sort it somehow
 
   const allCharacters = useY(useContext(CHARACTERS));
@@ -69,7 +78,8 @@ export const ContactList = ({ owner }: { owner: number }) => {
   const selfName = self.name ? self.name : self.workName;
   return (
     <div>
-      <h2 className="text-2xl p-2">Kontaktit</h2>
+      <h2 className="text-2xl p-2 inline-block">Kontaktit</h2>
+      {missingGroupContacts.map((id) => <MissingContact id={id} desc="Hahmot ovat samassa ryhmässä, mutta ei kontaktia" />)}
       <CreateContact characters={availableContacts} createContact={createContact} />
       {contacts.map((entry) => (
         <Contact selfName={selfName} {...entry} key={entry.id} destroy={() => destroyContact(entry.id)} />
@@ -91,8 +101,10 @@ const Contact = ({
 }) => {
   const selfPrefix = selfFirst ? "a" : "b";
   const otherPrefix = selfFirst ? "b" : "a";
+  console.log(selfName, `${selfPrefix}/desc`, `${otherPrefix}/desc`)
 
   const characters = useContext(CHARACTERS);
+  const selfId = contact.get(`${selfPrefix}/id`) as string
   const otherId = contact.get(`${otherPrefix}/id`) as string;
   const other = useY(characters.get(otherId)!);
 
@@ -112,12 +124,12 @@ const Contact = ({
       </h3>
       <div className="flex flex-row">
         <div className="flex flex-col flex-grow">
-          <h4>{selfName} -&gt; {other.name}</h4>
-          <TextEditor fragment={contact.get(`${selfPrefix}/desc`) as Y.XmlFragment} />
+          <h4>Tämän hahmon kuvaus</h4>
+          <TextEditor key={selfId} fragment={contact.get(`${selfPrefix}/desc`) as Y.XmlFragment} />
         </div>
         <div className="flex flex-col flex-grow">
-          <h4>{other.name} -&gt; {selfName}</h4>
-          <TextEditor fragment={contact.get(`${otherPrefix}/desc`) as Y.XmlFragment} />
+          <h4>Toisen hahmon kuvaus</h4>
+          <TextEditor key={otherId} fragment={contact.get(`${otherPrefix}/desc`) as Y.XmlFragment} />
         </div>
         <Button variant="ghost" size="icon" onClick={confirmDestroy}>
           <CircleXIcon />
@@ -126,6 +138,16 @@ const Contact = ({
     </div>
   );
 };
+
+const MissingContact = ({id, desc}: {id: number; desc: string;}) => {
+  const characters = useContext(CHARACTERS);
+  const character = useY(characters.get(`${id}`)!);
+  return <Alert className="max-w-md" onClick={() => navigate(`${id}`)}>
+    <TriangleAlertIcon />
+    <AlertTitle>Puuttuva kontakti: {character.name || character.workName}</AlertTitle>
+    <AlertDescription>{desc}</AlertDescription>
+  </Alert>
+}
 
 const CreateContact = ({characters, createContact}: {characters: {id: number, name: string}[], createContact: (withId: number) => void}) => {
   const [open, setOpen] = useState(false);

@@ -1,9 +1,9 @@
 import * as Y from 'yjs';
-import { CHARACTERS, CONTACTS } from './data'
+import { CHARACTERS, CONTACTS, GROUPS } from './data'
 import { CharacterList, CharacterSheet } from './character';
 import { Route, Switch } from 'wouter';
 
-export const App = () => {
+export const Game = () => {
   const doc = new Y.Doc();
   const characters = doc.getMap('characters');
   const char1 = new Y.Map();
@@ -25,14 +25,16 @@ export const App = () => {
   return <div className="max-w-5xl ml-auto mr-auto">
       <CONTACTS.Provider value={doc.getMap('contacts')}>
         <CHARACTERS.Provider value={doc.getMap('characters')}>
-          <Switch>
-            <Route path="/characters/:id">
-              {({id}) => <CharacterSheet id={parseInt(id)} />}
-            </Route>
-            <Route>
-              <CharacterList />
-            </Route>
-          </Switch>
+          <GROUPS.Provider value={doc.getMap('groups')}>
+            <Switch>
+              <Route path="/characters/:id">
+                {({id}) => <CharacterSheet id={parseInt(id)} />}
+              </Route>
+              <Route>
+                <CharacterList />
+              </Route>
+            </Switch>
+          </GROUPS.Provider>
         </CHARACTERS.Provider>
       </CONTACTS.Provider>
     </div>
