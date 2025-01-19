@@ -1,155 +1,53 @@
 import { useContext, useState } from "react";
-import * as Y from "yjs";
-import { CHARACTERS, CONTACTS } from "./data";
-import { Popover, PopoverContent, PopoverTrigger } from "./components/ui/popover";
+import { PROJECT } from "./data"
+import { Contact, createContact, sortContacts, useContacts } from "./data/contact"
+import { Character, useCharacter, useCharacters } from "./data/character";
+import { Textarea } from "./components/ui/textarea";
+import { useYjsPlainText } from "./data/hooks";
+import { Popover } from "@radix-ui/react-popover";
+import { PopoverContent, PopoverTrigger } from "./components/ui/popover";
 import { Button } from "./components/ui/button";
-import { ChevronsUpDown, CircleXIcon, TriangleAlertIcon } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./components/ui/command";
-import { useShallowY, useY } from "./yjs-hooks/useY";
-import { TextEditor } from "./editor";
-import { Link } from "wouter";
-import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
-import { navigate } from "wouter/use-browser-location";
 
-export const ContactList = ({ owner, groupContacts }: { owner: number; groupContacts: Set<number>; }) => {
-  // Only re-render when contacts are added/deleted
-  // (each Contact observes changes to it separately)
-  const contactsCtx = useContext(CONTACTS);
-  const allContacts = useShallowY(contactsCtx);
+export const ContactList = ({ chId }: { chId: string }) => {
+  const doc = useContext(PROJECT);
+  const contacts = sortContacts(chId, useContacts(doc, chId));
+  const contactSet = new Set(contacts.map(contact => contact.aId == chId ? contact.bId : contact.aId));
+  const availableContacts = useCharacters(doc)
+    .filter((ch) => !contactSet.has(ch.id));
 
-  const characters = useContext(CHARACTERS);
-  const self = useShallowY(characters.get(`${owner}`)!);
-
-  // Collect relevant contacts to a list
-  const contacts: { id: string; contact: Y.Map<string | Y.XmlFragment>; selfFirst: boolean }[] = [];
-  const contactMap: Map<number, typeof contacts[0]> = new Map();
-  for (const id of Object.keys(allContacts)) {
-    const idParts = parseId(id);
-    if (idParts.includes(owner)) {
-      const contact = {
-        id: id,
-        contact: contactsCtx.get(id)!,
-        selfFirst: idParts[0] == owner,
-      };
-      contacts.push(contact);
-      contactMap.set(idParts[0] == owner ? idParts[1] : idParts[0], contact);
-    }
-  }
-  
-  // Make sure we have contacts to all characters we share groups with (however brief they are)
-  const missingGroupContacts: number[] = [];
-  for (const charId of groupContacts) {
-    if (!contactMap.has(charId)) {
-      missingGroupContacts.push(charId);
-    }
-  }
-  // TODO sort it somehow
-
-  const allCharacters = useY(useContext(CHARACTERS));
-  const availableContacts: {id: number, name: string}[] = [];
-  for (const id of Object.keys(allCharacters)) {
-    const intId = parseInt(id);
-    if (intId != owner && !contactMap.has(intId)) {
-      const character = allCharacters[id];
-      availableContacts.push({
-        id: intId,
-        name: `${character.name} (${character.workName})`
-      });
-    }
-  }
-  
-  const createContact = (otherId: number) => {
-    const id = newContactId(owner, otherId);
-    const contact = new Y.Map<string | Y.XmlFragment>();
-    contactsCtx.set(id, contact);
-
-    const selfPrefix = otherId < owner ? "a" : "b";
-    const otherPrefix = otherId < owner ? "b" : "a";
-    contact.set(`${selfPrefix}/id`, `${owner}`);
-    contact.set(`${selfPrefix}/desc`, new Y.XmlFragment());
-    contact.set(`${otherPrefix}/id`, `${otherId}`);
-    contact.set(`${otherPrefix}/desc`, new Y.XmlFragment());
+  const newContact = (toId: string) => {
+    createContact(doc, chId, toId);
   }
 
-  const destroyContact = (id: string) => {
-    contactsCtx.delete(id);
-  };
-
-  const selfName = self.name ? self.name : self.workName;
-  return (
-    <div>
-      <h2 className="text-2xl p-2 inline-block">Kontaktit</h2>
-      {missingGroupContacts.map((id) => <MissingContact id={id} desc="Hahmot ovat samassa ryhmässä, mutta ei kontaktia" />)}
-      <CreateContact characters={availableContacts} createContact={createContact} />
-      {contacts.map((entry) => (
-        <Contact selfName={selfName} {...entry} key={entry.id} destroy={() => destroyContact(entry.id)} />
-      ))}
-    </div>
-  );
-};
-
-const Contact = ({
-  selfName,
-  contact,
-  selfFirst,
-  destroy
-}: {
-  selfName: string;
-  contact: Y.Map<string | Y.XmlFragment>;
-  selfFirst: boolean;
-  destroy: () => void;
-}) => {
-  const selfPrefix = selfFirst ? "a" : "b";
-  const otherPrefix = selfFirst ? "b" : "a";
-  console.log(selfName, `${selfPrefix}/desc`, `${otherPrefix}/desc`)
-
-  const characters = useContext(CHARACTERS);
-  const selfId = contact.get(`${selfPrefix}/id`) as string
-  const otherId = contact.get(`${otherPrefix}/id`) as string;
-  const other = useY(characters.get(otherId)!);
-
-  const confirmDestroy = () => {
-    const ok = confirm(`Haluatko varmasti poistaa kontaktin ${selfName} - ${other.name} MOLEMMILTA hahmoilta?`);
-    if (ok) {
-      destroy();
-    }
-  };
-
-  return (
-    <div>
-      <h3 className="text-xl">
-        <Link href={`/characters/${otherId}`}>
-          {other.name} (<span className="text-gray-600">{other.workName}</span>)
-        </Link>
-      </h3>
-      <div className="flex flex-row">
-        <div className="flex flex-col flex-grow">
-          <h4>Tämän hahmon kuvaus</h4>
-          <TextEditor key={selfId} fragment={contact.get(`${selfPrefix}/desc`) as Y.XmlFragment} />
-        </div>
-        <div className="flex flex-col flex-grow">
-          <h4>Toisen hahmon kuvaus</h4>
-          <TextEditor key={otherId} fragment={contact.get(`${otherPrefix}/desc`) as Y.XmlFragment} />
-        </div>
-        <Button variant="ghost" size="icon" onClick={confirmDestroy}>
-          <CircleXIcon />
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-const MissingContact = ({id, desc}: {id: number; desc: string;}) => {
-  const characters = useContext(CHARACTERS);
-  const character = useY(characters.get(`${id}`)!);
-  return <Alert className="max-w-md" onClick={() => navigate(`${id}`)}>
-    <TriangleAlertIcon />
-    <AlertTitle>Puuttuva kontakti: {character.name || character.workName}</AlertTitle>
-    <AlertDescription>{desc}</AlertDescription>
-  </Alert>
+  return <div>
+    <h2>Kontaktit</h2>
+    {contacts.map((contact) => <ContactView contextCh={chId} contact={contact} />)}
+    <CreateContact characters={availableContacts} newContact={newContact} />
+  </div>
 }
 
-const CreateContact = ({characters, createContact}: {characters: {id: number, name: string}[], createContact: (withId: number) => void}) => {
+export const ContactView = ({ contextCh, contact }: { contextCh: string; contact: Contact }) => {
+  const selfFirst = contact.aId == contextCh;
+  const doc = useContext(PROJECT);
+  // const self = useCharacter(doc, selfFirst ? contact.aId : contact.bId, false);
+  const other = useCharacter(doc, selfFirst ? contact.bId : contact.aId, false);
+
+  // Subscribe to description texts separately
+  const [selfDesc, setSelfDesc] = useYjsPlainText(selfFirst ? contact.aDesc : contact.bDesc);
+  const [otherDesc, setOtherDesc] = useYjsPlainText(selfFirst ? contact.bDesc : contact.aDesc);
+
+  return <div>
+    <h3>{other.name} ({other.workName})</h3>
+    <div className="flex">
+      <Textarea onChange={(event) => setSelfDesc(event.target.value)}>{selfDesc}</Textarea>
+      <Textarea onChange={(event) => setOtherDesc(event.target.value)}>{otherDesc}</Textarea>
+    </div>
+  </div>;
+};
+
+const CreateContact = ({characters, newContact}: {characters: Character[], newContact: (toId: string) => void}) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -177,10 +75,10 @@ const CreateContact = ({characters, createContact}: {characters: {id: number, na
                   value={`${character.id}`}
                   onSelect={(currentValue) => {
                     setOpen(false);
-                    createContact(parseInt(currentValue));
+                    newContact(currentValue);
                   }}
                 >
-                  {character.name}
+                  {character.name} ({character.workName})
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -190,11 +88,3 @@ const CreateContact = ({characters, createContact}: {characters: {id: number, na
     </Popover>
   );
 };
-
-function newContactId(charA: number, charB: number) {
-  return charA > charB ? `${charA}-${charB}` : `${charB}-${charA}`;
-}
-
-function parseId(contactId: string): number[] {
-  return contactId.split("-").map(i => parseInt(i));
-}
