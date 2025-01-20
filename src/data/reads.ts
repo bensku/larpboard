@@ -6,7 +6,7 @@ export function getYObject(map: Y.Map<unknown>, key: string, type: z.ZodObject<a
   if (!(value instanceof Y.Map)) {
     throw new Error(`Expected Y.Map at key ${key}, got ${value}`);
   }
-  return type.parse(getMapData(value));
+  return parseMapData(value, type);
 }
 
 export function queryYjs<T extends z.ZodObject<any>>(map: Y.Map<unknown>, type: T, queries: object[]): TypeOf<T>[] {
@@ -30,19 +30,20 @@ export function queryYjs<T extends z.ZodObject<any>>(map: Y.Map<unknown>, type: 
     }
 
     if (queryMatch) {
-      matches.push(type.parse(getMapData(value)));
+      matches.push(parseMapData(value, type));
     }
   }
   return matches;
 }
 
-function getMapData(obj: Y.Map<unknown>) {
+export function parseMapData<T extends z.ZodObject<any>>(obj: Y.Map<unknown>, type: T): TypeOf<T> {
   // Unlike toJSON(), we only unwrap one layer of Yjs
   // This allows e.g. XMLFragment to be used for rich text
   const data = {} as Record<string, unknown>;
   for (const [key, value] of obj.entries()) {
     data[key] = value;
   }
-  data._y = obj;
-  return data;
+  const parsed = type.parse(data);
+  parsed._y = obj;
+  return parsed;
 }

@@ -9,8 +9,10 @@ import { PROJECT } from "./data";
 import { ContactList } from "./contacts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./components/ui/table";
 import { navigate } from "wouter/use-browser-location";
-import { Badge } from "lucide-react";
 import { Button } from "./components/ui/button";
+import { Badge } from "./components/ui/badge";
+import { cn } from "./lib/utils";
+import { TextEditor } from "./editor";
 
 export const CharacterList = () => {
   const doc = useContext(PROJECT);
@@ -53,7 +55,7 @@ export const CharacterList = () => {
             <TableCell>{char.name}</TableCell>
             <TableCell>{char.workName}</TableCell>
             <TableCell className="flex gap-2">
-              {characterGroups.get(char.id)?.map(group => <Badge>{group.id}</Badge>)}
+              {characterGroups.get(char.id)?.map(group => <Badge key={group.id}>{group.id}</Badge>)}
             </TableCell>
           </TableRow>
         )}
@@ -69,40 +71,64 @@ export const CharacterList = () => {
 export const CharacterView = ({ id }: { id: string }) => {
   const doc = useContext(PROJECT);
   const character = useCharacter(doc, id, true);
-  const [name, setName] = useYjsValue(character, 'name');
-  const [workName, setWorkName] = useYjsValue(character, 'workName');
+  const [name, setName] = useYjsValue(character ?? {name: ''}, 'name');
+  const [workName, setWorkName] = useYjsValue(character ?? {workName: ''}, 'workName');
 
-  const [ownTags, availableTags] = useTags(doc, character.id);
+  const [ownTags, availableTags] = useTags(doc, character?.id ?? '');
   const ownGroups = ownTags.filter(tag => tag.type == 'group');
   const availableGroups = availableTags
     .filter(tag => tag.type == 'group')
     .filter(tag => tag.characters.size > 0); // Suggest only non-empty groups
   const [activeGroup, setActiveGroup] = useState<number | null>(null);
 
+  if (!character) {
+    return null; // Loading...
+  }
+
   return <div>
     <h1 className="text-4xl p-2">
       <input placeholder="Hahmon nimi" value={name} onChange={(event) => setName(event.target.value)} className="outline-none max-w-md" />
     </h1>
-    <div className="flex flex-col gap-2 max-w-md">
-      <DataField id="workname" label="Työnimi">
-        <Input name="workname" value={workName} onChange={(event) => setWorkName(event.target.value)} />
-      </DataField>
-      <DataField id="groups" label="Ryhmät">
-        <TagInput name="groups" tags={ownGroups.map(tag => ({ id: tag.id, text: tag.id }))} setTags={() => null}
-          enableAutocomplete={true}
-          autocompleteOptions={availableGroups.map(tag => ({ id: tag.id, text: tag.id }))}
-          onTagAdd={(tag) => addTag(doc, character.id, { id: tag, type: 'group' })}
-          onTagRemove={(tag) => removeTag(doc, character.id, tag)}
-          activeTagIndex={activeGroup} setActiveTagIndex={setActiveGroup} />
-      </DataField>
+    <div className="flex flex-col gap-2">
+      <FieldGroup>
+        <DataField id="workname" label="Työnimi" grow>
+          <Input name="workname" value={workName} onChange={(event) => setWorkName(event.target.value)} />
+        </DataField>
+        <DataField id="groups" label="Ryhmät">
+          <TagInput name="groups" tags={ownGroups.map(tag => ({ id: tag.id, text: tag.id }))} setTags={() => null}
+            enableAutocomplete={true}
+            autocompleteOptions={availableGroups.map(tag => ({ id: tag.id, text: tag.id }))}
+            onTagAdd={(tag) => addTag(doc, character.id, { id: tag, type: 'group' })}
+            onTagRemove={(tag) => removeTag(doc, character.id, tag)}
+            activeTagIndex={activeGroup} setActiveTagIndex={setActiveGroup} />
+        </DataField>
+      </FieldGroup>
+      <FieldGroup>
+        <DataField id="description" label="Pelinjohdon kuvaus" grow>
+          <TextEditor fragment={character.details} />
+        </DataField>
+      </FieldGroup>
     </div>
     <ContactList chId={character.id} />
   </div>;
 };
 
-const DataField = ({ id, label, children }: { id: string; label: string; children: ReactNode; }) => {
-  return <div className="flex items-center space-x-2">
-    <Label htmlFor={id}>{label}</Label>
+const DataField = ({ id, label, children, grow }: { id: string; label: string; children: ReactNode; grow?: boolean }) => {
+  return <div className={cn('flex flex-col space-x-2 mb-2', grow && 'flex-grow')}>
+    <Label htmlFor={id} className="ml-3 mb-1">{label}</Label>
     {children}
   </div>
+}
+
+const FieldGroup = ({ children }: { children: ReactNode }) => {
+  return <div className="flex gap-4">
+    {children}
+  </div>
+}
+
+export const CharacterName = ({character}: {character: Character}) => {
+  if (character.name.length == 0) {
+    return <>{character.workName}</>
+  }
+  return <>{character.name} ({character.workName})</>;
 }

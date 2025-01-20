@@ -2,6 +2,7 @@ import { TypeOf, z } from "zod";
 import * as Y from "yjs";
 import { useYjsQuery } from "./hooks";
 import { updateData } from "./writes";
+import { getYObject } from "./reads";
 
 const Tag = z.object({
   id: z.string(),
@@ -32,14 +33,11 @@ export function addTag(doc: Y.Doc, chId: string, tag: Omit<Tag, 'characters'>) {
   // Update tag data or create it
   updateData(doc.getMap('tags'), tag.id, {
     ...tag,
+    characters: new Y.Map(),
   }, Tag);
 
-  // Add member list to it unless it already exists
-  const map = doc.getMap('tags').get(chId) as Y.Map<Y.Map<unknown>>;
-  if (!map.has('characters')) {
-    map.set('characters', new Y.Map());
-  }
-  map.get('characters')?.set(chId, true); // Add character as member
+  const tagDef = getYObject(doc.getMap('tags'), tag.id, Tag);
+  tagDef.characters.set(chId, true); // Add character as member
 }
 
 export function removeTag(doc: Y.Doc, chId: string, tagId: string) {

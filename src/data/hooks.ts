@@ -1,29 +1,63 @@
-import { useRef, useSyncExternalStore } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import * as Y from "yjs";
 import { TypeOf, z } from "zod";
-import { getYObject, queryYjs } from "./reads";
+import { parseMapData, queryYjs } from "./reads";
 
 export function useYjsData<T extends z.ZodObject<any>>(map: Y.Map<unknown>, type: T, key: string, deep: boolean): TypeOf<T> {
   const prevDataRef = useRef<any | null>(null);
-
-  const value = map.get(key);
-  if (!(value instanceof Y.Map)) {
-    throw new Error(`Expected Y.Map at key ${key}, got ${value}`);
-  }
-  const observe = deep ? value.observeDeep.bind(map) : value.observe.bind(map);
-  const unobserve = deep ? value.unobserveDeep.bind(map) : value.unobserve.bind(map);
+  const [value, setValue] = useState<Y.Map<unknown> | undefined>(map.get(key) as Y.Map<unknown> | undefined);
 
   return useSyncExternalStore((onChange) => {
-    const handler = () => {
+    const valueHandler = () => {
       prevDataRef.current = null;
       onChange();
     };
-    observe(handler);
-    return () => unobserve(handler);
-  }, () => {
-    if (prevDataRef.current === null) {
-      prevDataRef.current = getYObject(value, key, type);
+
+    const mapHandler = (event: Y.YMapEvent<unknown>) => {
+      if (event.keysChanged.has(key)) {
+        const value = map.get(key) as Y.Map<unknown> | undefined;
+        setValue(value);
+        if (value) {
+          if (deep) {
+            value.observeDeep(valueHandler);
+          } else {
+            value.observe(valueHandler);
+          }
+        }
+        prevDataRef.current = null;
+        onChange();
+      }
+    };
+    map.observe(mapHandler);
+
+    // Value might already exist; if it does, mapHandler may never be called
+    if (value) {
+      if (deep) {
+        value.observeDeep(valueHandler);
+      } else {
+        value.observe(valueHandler);
+      }
     }
+    
+    return () => {
+      map.unobserve(mapHandler);
+      if (value) {
+        if (deep) {
+          value.unobserveDeep(valueHandler);
+        } else {
+          value.unobserve(valueHandler);
+        }
+      }
+    };
+  }, () => {
+    if (!(value instanceof Y.Map)) {
+      // Key does not exist in map given to us (but it might soon)
+      return undefined;
+    } else if (prevDataRef.current === null) {
+      // Key does exist, and we'll need to update JS object based on it
+      prevDataRef.current = parseMapData(value, type);
+    }
+    // Return cached JS object to avoid infinite React rerender loops
     return prevDataRef.current;
   });
 }
@@ -40,7 +74,9 @@ export function useYjsQuery<T extends z.ZodObject<any>>(map: Y.Map<unknown>, typ
       onChange();
     };
     observe(handler);
-    return () => unobserve(handler);
+    return () => {
+      unobserve(handler);
+    };
   },  () => {
     if (prevDataRef.current === null) {
       prevDataRef.current = queryYjs(map, type, queries);
@@ -70,8 +106,11 @@ export function useYjsPlainText(text: Y.Text): [string, (str: string) => void] {
 export function useYjsValue<T extends object, K extends keyof T>(obj: T, key: K): [T[K], (value: T[K]) => void] {
   const value = useSyncExternalStore((onChange) => {
     const map = (obj as any)._y as Y.Map<unknown>;
+    if (!map) {
+      return () => null;
+    }
     const handler = (event: Y.YMapEvent<unknown>) => {
-      if (key in event.keysChanged) {
+      if (event.keysChanged.has(key)) {
         onChange();
       }
     };

@@ -1,7 +1,7 @@
 import { z, TypeOf } from "zod";
 import * as Y from "yjs";
 import { useYjsQuery } from "./hooks";
-import { updateData } from "./writes";
+import { deleteData, updateData } from "./writes";
 import { PositionSource } from "position-strings";
 import { queryYjs } from "./reads";
 
@@ -54,4 +54,8 @@ export function sortContacts(chId: string, contacts: Contact[]) {
     const bKey = chId == rhs.aId ? rhs.aSortKey : rhs.bSortKey;
     return aKey.localeCompare(bKey);
   });
+}
+
+export function deleteContact(doc: Y.Doc, contact: Contact) {
+  deleteData(doc.getMap('contacts'), `${contact.aId}-${contact.bId}`);
 }

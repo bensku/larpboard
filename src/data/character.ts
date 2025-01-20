@@ -25,7 +25,7 @@ export function useCharacters(doc: Y.Doc): Character[] {
   return useYjsQuery(doc.getMap('characters'), Character, [{}], true);
 }
 
-export function useCharacter(doc: Y.Doc, id: string, deep: boolean): Character {
+export function useCharacter(doc: Y.Doc, id: string, deep: boolean): Character | undefined {
   return useYjsData(doc.getMap('characters'), Character, id, deep);
 }
 
