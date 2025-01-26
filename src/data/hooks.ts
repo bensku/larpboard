@@ -116,7 +116,15 @@ export function useYjsValue<T extends object, K extends keyof T>(obj: T, key: K)
     };
     map.observe(handler);
     return () => map.unobserve(handler);
-  }, () => obj[key]);
+  }, () => {
+    // If we just peek at obj[key], this won't work for non-deep observing
+    const map = (obj as any)._y as Y.Map<unknown>;
+    if (!map) {
+      // But on first render, the map won't be available...
+      return obj[key];
+    }
+    return map.get(key) as T[K];
+  });
 
   const setValue = (value: T[K]) => {
     const map = (obj as any)._y as Y.Map<unknown>;

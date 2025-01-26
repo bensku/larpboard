@@ -3,7 +3,7 @@ import { useYjsData, useYjsQuery } from './hooks';
 import * as Y from 'yjs';
 import { updateData } from './writes';
 import { PositionSource } from 'position-strings';
-import { queryYjs } from './reads';
+import { getYObject, queryYjs } from './reads';
 
 const Character = z.object({
   id: z.string(),
@@ -11,18 +11,28 @@ const Character = z.object({
 
   name: z.string(),
   workName: z.string(),
+  writerName: z.string(),
   blurb: z.string(),
   details: z.instanceof(Y.XmlFragment),
   playerDescLink: z.string(),
 
   detailsReady: z.boolean(),
   contactsReady: z.boolean(),
+  detailsChecked: z.boolean(),
+  contactsChecked: z.boolean(),
+
+  ignoreContactCounts: z.boolean(),
+  ignoreMissingGroupContacts: z.boolean(),
 });
 
 export type Character = TypeOf<typeof Character>;
 
 export function useCharacters(doc: Y.Doc): Character[] {
   return useYjsQuery(doc.getMap('characters'), Character, [{}], true);
+}
+
+export function getCharacter(doc: Y.Doc, id: string): Character {
+  return getYObject(doc.getMap('characters'), id, Character);
 }
 
 export function useCharacter(doc: Y.Doc, id: string, deep: boolean): Character | undefined {
@@ -41,10 +51,15 @@ export function createCharacter(doc: Y.Doc, id: string): void {
     sortKey: posSource.createBetween(lastCh?.sortKey),
     name: '',
     workName: 'Uusi hahmo',
+    writerName: '',
     blurb: '',
     details: new Y.XmlFragment(),
     playerDescLink: '',
     detailsReady: false,
     contactsReady: false,
+    detailsChecked: false,
+    contactsChecked: false,
+    ignoreContactCounts: false,
+    ignoreMissingGroupContacts: false
   }, Character);
 }

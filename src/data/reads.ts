@@ -1,7 +1,7 @@
 import * as Y from "yjs";
 import { TypeOf, z } from "zod";
 
-export function getYObject(map: Y.Map<unknown>, key: string, type: z.ZodObject<any>): TypeOf<typeof type> {
+export function getYObject<T extends z.ZodObject<any>>(map: Y.Map<unknown>, key: string, type: T): TypeOf<T> {
   const value = map.get(key);
   if (!(value instanceof Y.Map)) {
     throw new Error(`Expected Y.Map at key ${key}, got ${value}`);

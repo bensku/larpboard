@@ -1,8 +1,6 @@
-import { ReactNode, useContext, useState } from "react";
-import { Label } from "./components/ui/label";
+import { useContext, useState } from "react";
 import { Character, createCharacter, useCharacter, useCharacters } from "./data/character";
 import { useYjsValue } from "./data/hooks";
-import { Input } from "./components/ui/input";
 import { TagInput } from "emblor";
 import { addTag, removeTag, Tag, useAllTags, useTags } from "./data/tag";
 import { PROJECT } from "./data";
@@ -11,8 +9,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { navigate } from "wouter/use-browser-location";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
-import { cn } from "./lib/utils";
 import { TextEditor } from "./editor";
+import { Field, FieldGroup, TextField, Toggle } from "./components/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
+import { validate } from "./validators/core";
+import { validateContactCount, validateGroupContacts, validateOneSidedContacts } from "./validators/contact";
+import { Alert } from "./components/ui/alert";
 
 export const CharacterList = () => {
   const doc = useContext(PROJECT);
@@ -72,14 +74,6 @@ export const CharacterView = ({ id }: { id: string }) => {
   const doc = useContext(PROJECT);
   const character = useCharacter(doc, id, true);
   const [name, setName] = useYjsValue(character ?? {name: ''}, 'name');
-  const [workName, setWorkName] = useYjsValue(character ?? {workName: ''}, 'workName');
-
-  const [ownTags, availableTags] = useTags(doc, character?.id ?? '');
-  const ownGroups = ownTags.filter(tag => tag.type == 'group');
-  const availableGroups = availableTags
-    .filter(tag => tag.type == 'group')
-    .filter(tag => tag.characters.size > 0); // Suggest only non-empty groups
-  const [activeGroup, setActiveGroup] = useState<number | null>(null);
 
   if (!character) {
     return null; // Loading...
@@ -89,40 +83,91 @@ export const CharacterView = ({ id }: { id: string }) => {
     <h1 className="text-4xl p-2">
       <input placeholder="Hahmon nimi" value={name} onChange={(event) => setName(event.target.value)} className="outline-none max-w-md" />
     </h1>
-    <div className="flex flex-col gap-2">
-      <FieldGroup>
-        <DataField id="workname" label="Työnimi" grow>
-          <Input name="workname" value={workName} onChange={(event) => setWorkName(event.target.value)} />
-        </DataField>
-        <DataField id="groups" label="Ryhmät">
-          <TagInput name="groups" tags={ownGroups.map(tag => ({ id: tag.id, text: tag.id }))} setTags={() => null}
-            enableAutocomplete={true}
-            autocompleteOptions={availableGroups.map(tag => ({ id: tag.id, text: tag.id }))}
-            onTagAdd={(tag) => addTag(doc, character.id, { id: tag, type: 'group' })}
-            onTagRemove={(tag) => removeTag(doc, character.id, tag)}
-            activeTagIndex={activeGroup} setActiveTagIndex={setActiveGroup} />
-        </DataField>
-      </FieldGroup>
-      <FieldGroup>
-        <DataField id="description" label="Pelinjohdon kuvaus" grow>
-          <TextEditor fragment={character.details} />
-        </DataField>
-      </FieldGroup>
-    </div>
-    <ContactList chId={character.id} />
+    <Tabs defaultValue="details">
+      <TabsList>
+        <TabsTrigger value="details">Tiedot</TabsTrigger>
+        <TabsTrigger value="contacts">Kontaktit</TabsTrigger>
+        <TabsTrigger value="settings">Asetukset</TabsTrigger>
+      </TabsList>
+      <TabsContent value="details">
+        <DetailsView character={character} />
+      </TabsContent>
+      <TabsContent value="contacts">
+        <ContactsView character={character} />
+      </TabsContent>
+      <TabsContent value="settings">
+        <SettingsView character={character} />
+      </TabsContent>
+    </Tabs>
   </div>;
 };
 
-const DataField = ({ id, label, children, grow }: { id: string; label: string; children: ReactNode; grow?: boolean }) => {
-  return <div className={cn('flex flex-col space-x-2 mb-2', grow && 'flex-grow')}>
-    <Label htmlFor={id} className="ml-3 mb-1">{label}</Label>
-    {children}
+const DetailsView = ({ character }: { character: Character }) => {
+  const doc = useContext(PROJECT);
+  const [ownTags, availableTags] = useTags(doc, character?.id ?? '');
+  const ownGroups = ownTags.filter(tag => tag.type == 'group');
+  const availableGroups = availableTags
+    .filter(tag => tag.type == 'group')
+    .filter(tag => tag.characters.size > 0); // Suggest only non-empty groups
+  const [activeGroup, setActiveGroup] = useState<number | null>(null);
+
+  return <div className="flex flex-col gap-2">
+    <FieldGroup>
+      <TextField obj={character} field="workName" label="Työnimi" grow />
+      <TextField obj={character} field="writerName" label="Kirjoittaja" />
+    </FieldGroup>
+    <FieldGroup>
+      <TextField obj={character} field="blurb" label="Hahmo hyvin lyhyesti" grow />
+      <TextField obj={character} field="playerDescLink" label="Linkki hahmokuvaukseen" grow />
+    </FieldGroup>
+    <FieldGroup>
+      <Field id="groups" label="Ryhmät">
+        <TagInput name="groups" tags={ownGroups.map(tag => ({ id: tag.id, text: tag.id }))} setTags={() => null}
+          enableAutocomplete={true}
+          autocompleteOptions={availableGroups.map(tag => ({ id: tag.id, text: tag.id }))}
+          onTagAdd={(tag) => addTag(doc, character.id, { id: tag, type: 'group' })}
+          onTagRemove={(tag) => removeTag(doc, character.id, tag)}
+          activeTagIndex={activeGroup} setActiveTagIndex={setActiveGroup} />
+      </Field>
+    </FieldGroup>
+    <FieldGroup>
+      <Toggle obj={character} field="detailsReady" label="Ranskalaiset valmiit" />
+      <Toggle obj={character} field="contactsReady" label="Kontaktit valmiit" />
+    </FieldGroup>
+    <FieldGroup>
+      <Field id="description" label="Pelinjohdon kuvaus" grow>
+        <TextEditor fragment={character.details} />
+      </Field>
+    </FieldGroup>
   </div>
 }
 
-const FieldGroup = ({ children }: { children: ReactNode }) => {
-  return <div className="flex gap-4">
-    {children}
+const ContactsView = ({ character }: { character: Character }) => {
+  const doc = useContext(PROJECT);
+  const [errors, setErrors] = useState<string[]>([]);
+
+  const checkContacts = () => {
+    const result = validate(doc, character, [
+      validateContactCount,
+      validateGroupContacts,
+      validateOneSidedContacts
+    ]);
+    setErrors(result.pass ? ['Kaikki kunnossa!'] : result.messages);
+  };
+
+  return <div>
+    <Button onClick={checkContacts}>Tarkasta kontaktit</Button>
+    {errors.map(error => <Alert key={error}>{error}</Alert>)}
+    <ContactList chId={character.id} />
+  </div>
+}
+
+const SettingsView = ({ character }: { character: Character }) => {
+  return <div>
+    <FieldGroup>
+      <Toggle obj={character} field="ignoreContactCounts" label="Ohita kontaktimäärien tarkastus" />
+      <Toggle obj={character} field="ignoreMissingGroupContacts" label="Ohita ryhmien kontaktien tarkastus" />
+    </FieldGroup>
   </div>
 }
 

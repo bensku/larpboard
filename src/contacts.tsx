@@ -11,6 +11,7 @@ import { ChevronsUpDown, CircleXIcon } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./components/ui/command";
 import { CharacterName } from "./character";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle, AlertDialogTrigger } from "./components/ui/alert-dialog";
+import { Toggle } from "./components/form";
 
 export const ContactList = ({ chId }: { chId: string }) => {
   const doc = useContext(PROJECT);
@@ -51,6 +52,8 @@ export const ContactView = ({ contextCh, contact }: { contextCh: string; contact
   return <div>
     <div className="flex m-2 ml-0 gap-2">
       <h3 className="flex-grow"><CharacterName character={other} /></h3>
+      <Toggle obj={contact} field="close" label="Lähikohtakti" />
+      <Toggle obj={contact} field="oneSided" label="Yksipuolinen" />
       <AlertDialog>
         <AlertDialogTrigger asChild>
           <Button variant="ghost" size="icon" className="h-6 w-6">

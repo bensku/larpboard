@@ -13,12 +13,19 @@ const Contact = z.object({
   bId: z.string(),
   bDesc: z.instanceof(Y.Text),
   bSortKey: z.string(),
+
+  close: z.boolean(),
+  oneSided: z.boolean(),
 });
 
 export type Contact = TypeOf<typeof Contact>;
 
 export function useContacts(doc: Y.Doc, chId: string): Contact[] {
   return useYjsQuery(doc.getMap('contacts'), Contact, [{ aId: chId }, { bId: chId }], false);
+}
+
+export function getContacts(doc: Y.Doc, chId: string): Contact[] {
+  return queryYjs(doc.getMap('contacts'), Contact, [{ aId: chId }, { bId: chId }]);
 }
 
 const posSource = new PositionSource();
@@ -45,6 +52,9 @@ export function createContact(doc: Y.Doc, fromId: string, toId: string) {
     bId,
     bDesc: new Y.Text(),
     bSortKey: posSource.createBetween(bLast?.aId == bId ? bLast.aSortKey : bLast?.bSortKey),
+
+    close: false,
+    oneSided: false
   }, Contact);
 }
 
