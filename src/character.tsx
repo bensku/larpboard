@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Character, createCharacter, useCharacter, useCharacters } from "./data/character";
+import { Character, createCharacter, deleteCharacter, useCharacter, useCharacters } from "./data/character";
 import { useYjsValue } from "./data/hooks";
 import { TagInput } from "emblor";
 import { addTag, removeTag, Tag, useAllTags, useTags } from "./data/tag";
@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { validate } from "./validators/core";
 import { validateContactCount, validateGroupContacts, validateOneSidedContacts } from "./validators/contact";
 import { Alert } from "./components/ui/alert";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle, AlertDialogTrigger } from "./components/ui/alert-dialog";
 
 export const CharacterList = () => {
   const doc = useContext(PROJECT);
@@ -163,11 +164,30 @@ const ContactsView = ({ character }: { character: Character }) => {
 }
 
 const SettingsView = ({ character }: { character: Character }) => {
+  const doc = useContext(PROJECT);
   return <div>
     <FieldGroup>
       <Toggle obj={character} field="ignoreContactCounts" label="Ohita kontaktimäärien tarkastus" />
       <Toggle obj={character} field="ignoreMissingGroupContacts" label="Ohita ryhmien kontaktien tarkastus" />
     </FieldGroup>
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive">Poista hahmo</Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogTitle>Haluatko varmasti poistaa hahmon <CharacterName character={character} />?</AlertDialogTitle>
+        <AlertDialogDescription>
+          Hahmon poistaminen on peruuttamaton toimi.
+        </AlertDialogDescription>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Peru</AlertDialogCancel>
+          <AlertDialogAction onClick={() => {
+            deleteCharacter(doc, character.id);
+            navigate('../..');
+          }}>Poista hahmo!</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   </div>
 }
 

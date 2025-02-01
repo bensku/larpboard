@@ -1,7 +1,7 @@
 import { TypeOf, z } from 'zod';
 import { useYjsData, useYjsQuery } from './hooks';
 import * as Y from 'yjs';
-import { updateData } from './writes';
+import { deleteData, updateData } from './writes';
 import { PositionSource } from 'position-strings';
 import { getYObject, queryYjs } from './reads';
 
@@ -62,4 +62,8 @@ export function createCharacter(doc: Y.Doc, id: string): void {
     ignoreContactCounts: false,
     ignoreMissingGroupContacts: false
   }, Character);
+}
+
+export function deleteCharacter(doc: Y.Doc, id: string): void {
+  deleteData(doc.getMap('characters'), id);
 }
