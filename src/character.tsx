@@ -1,3 +1,4 @@
+import { cn } from "./lib/utils";
 import { useContext, useState } from "react";
 import { Character, createCharacter, deleteCharacter, useCharacter, useCharacters } from "./data/character";
 import { useYjsValue } from "./data/hooks";
@@ -49,16 +50,24 @@ export const CharacterList = () => {
         <TableRow>
           <TableHead>Nimi</TableHead>
           <TableHead>Työnimi</TableHead>
-          <TableHead>Ryhmät</TableHead>
+          <TableHead className="w-[150px]">Status</TableHead>
+          <TableHead className="w-[200px]">Ryhmät</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {characters.map((char) =>
-          <TableRow key={char.id} onClick={() => navigate(`/characters/${char.id}`)} className="cursor-grab">
+          <TableRow key={char.id} onClick={() => navigate(`/characters/${char.id}`)} className="cursor-pointer">
             <TableCell>{char.name}</TableCell>
             <TableCell>{char.workName}</TableCell>
+            <TableCell className="flex gap-1 items-center">
+              <span className={cn(!char.detailsReady && "text-muted-foreground")}>📝</span>
+              <span className={cn(!char.contactsReady && "text-muted-foreground")}>🤝</span>
+              {char.playerDescLink && "🔗"}
+              <span className={cn("text-xs", char.detailsChecked ? "text-green-500" : "text-muted-foreground")}>✓</span>
+              <span className={cn("text-xs", char.contactsChecked ? "text-green-500" : "text-muted-foreground")}>✓</span>
+            </TableCell>
             <TableCell className="flex gap-2">
-              {characterGroups.get(char.id)?.map(group => <Badge key={group.id}>{group.id}</Badge>)}
+              {characterGroups.get(char.id)?.map(group => <Badge key={group.id} variant="secondary">{group.id}</Badge>)}
             </TableCell>
           </TableRow>
         )}
