@@ -134,6 +134,8 @@ const DetailsView = ({ character }: { character: Character }) => {
     <FieldGroup>
       <Toggle obj={character} field="detailsReady" label="Ranskalaiset valmiit" />
       <Toggle obj={character} field="contactsReady" label="Kontaktit valmiit" />
+      <Toggle obj={character} field="detailsChecked" label="Ranskalaiset tarkistettu" className="text-blue-500" />
+      <Toggle obj={character} field="contactsChecked" label="Kontaktit tarkistettu" className="text-blue-500" />
     </FieldGroup>
     <FieldGroup>
       <Field id="description" label="Pelinjohdon kuvaus" grow>
