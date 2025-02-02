@@ -2,42 +2,50 @@ import * as Y from 'yjs';
 import { PROJECT } from './data'
 import { Link, Route, Switch } from 'wouter';
 import { CharacterList, CharacterView } from './character';
-import { IndexeddbPersistence } from 'y-indexeddb';
 import { useSettings } from './data/settings';
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Button } from './components/ui/button';
 import { SettingsView } from './settings';
 import { TooltipProvider } from './components/ui/tooltip';
+import { HocuspocusProvider } from "@hocuspocus/provider";
 
 export const Game = () => {
-  const doc = new Y.Doc();
-  new IndexeddbPersistence('game', doc);
-  // const characters = doc.getMap('characters');
-  // const char1 = new Y.Map();
-  // characters.set('1', char1);
-  // char1.set('id', '1');
-  // char1.set('name', 'Testi Testilä');
-  // char1.set('workName', 'Testityyppi');
 
-  // const char2 = new Y.Map();
-  // characters.set('2', char2);
-  // char2.set('id', '2');
-  // char2.set('name', 'Matti Meikäläinen');
-  // char2.set('workName', 'Jokapaikanhöylä');
-
-  // <h1 className="text-4xl p-2">
-  //   <input placeholder="Pelin nimi" value={view.name} onChange={(event) => self.set('name', event.target.value)} className="outline-none max-w-md" />
-  // </h1>
 
   return <div className="max-w-5xl ml-auto mr-auto">
-    <PROJECT.Provider value={doc}>
-      <TooltipProvider>
-        <App />
-      </TooltipProvider>
-    </PROJECT.Provider>
+    <Switch>
+      <Route path="/:project/:authToken" nest>
+        {({ project, authToken }) => <ProjectView project={project} authToken={authToken} />}
+      </Route>
+      <Route>
+        Eksyksissä? Pyydä ylläpitäjältä linkki projektiisi!
+      </Route>
+    </Switch>
   </div>
 }
 
+const ProjectView = ({ project, authToken }: { project: string, authToken: string }) => {
+  const [doc, setDoc] = useState<Y.Doc | undefined>(undefined);
+
+  useEffect(() => {
+    const provider = new HocuspocusProvider({
+      url: '/sync',
+      name: project,
+      token: authToken
+    });
+    setDoc(provider.document);
+  }, [project, authToken]);
+
+  if (!doc) {
+    return <div>Loading...</div>
+  };
+
+  return <PROJECT.Provider value={doc}>
+    <TooltipProvider>
+      <App />
+    </TooltipProvider>
+  </PROJECT.Provider>;
+}
 
 const App = () => {
   const doc = useContext(PROJECT);

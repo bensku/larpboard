@@ -31,6 +31,7 @@ import { Alert } from "./components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle, AlertDialogTrigger } from "./components/ui/alert-dialog";
 import { GripVerticalIcon, LinkIcon, NotebookTabsIcon, UnlinkIcon, UserPenIcon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
+import { Link } from "wouter";
 
 const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }) => {
   const {
@@ -49,19 +50,20 @@ const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }
   };
 
   return (
-    <TableRow
-      ref={setNodeRef}
-      style={style}
-      onClick={() => navigate(`/characters/${id}`)}
-    >
-      {children}
-      <td
-        {...attributes}
-        {...listeners}
+    <Link asChild to={`/characters/${id}`}>
+      <TableRow
+        ref={setNodeRef}
+        style={style}
       >
-        <GripVerticalIcon />
-      </td>
-    </TableRow>
+          {children}
+        <td
+          {...attributes}
+          {...listeners}
+          >
+          <GripVerticalIcon />
+        </td>
+      </TableRow>
+    </Link>
   );
 };
 
@@ -89,7 +91,7 @@ export const CharacterList = () => {
   const newCharacter = () => {
     const id = crypto.randomUUID();
     createCharacter(doc, id);
-    navigate(`/characters/${id}`)
+    navigate(`characters/${id}`)
   }
 
   const handleDragEnd = (event: DragEndEvent) => {

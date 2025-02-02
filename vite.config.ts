@@ -10,4 +10,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      "/sync": {
+        target: "ws://localhost:8080",
+        changeOrigin: true,
+        ws: true,
+      },
+    },
+  },
 })
+
