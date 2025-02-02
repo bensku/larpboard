@@ -17,6 +17,8 @@ import { validate } from "./validators/core";
 import { validateContactCount, validateGroupContacts, validateOneSidedContacts } from "./validators/contact";
 import { Alert } from "./components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle, AlertDialogTrigger } from "./components/ui/alert-dialog";
+import { LinkIcon, NotebookTabsIcon, UnlinkIcon, UserPenIcon } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
 
 export const CharacterList = () => {
   const doc = useContext(PROJECT);
@@ -48,26 +50,30 @@ export const CharacterList = () => {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Nimi</TableHead>
-          <TableHead>Työnimi</TableHead>
+          <TableHead className="w-[120px]">Kirjoittaja</TableHead>
+          <TableHead className="w-[150px]">Ryhmät</TableHead>
           <TableHead className="w-[150px]">Status</TableHead>
-          <TableHead className="w-[200px]">Ryhmät</TableHead>
+          <TableHead className="w-[250px]">Nimi</TableHead>
+          <TableHead>Hahmo hyvin lyhyesti</TableHead>
+          <TableHead>Kuvaus</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {characters.map((char) =>
           <TableRow key={char.id} onClick={() => navigate(`/characters/${char.id}`)} className="cursor-pointer">
-            <TableCell>{char.name}</TableCell>
-            <TableCell>{char.workName}</TableCell>
-            <TableCell className="flex gap-1 items-center">
-              <span className={cn(!char.detailsReady && "text-muted-foreground")}>📝</span>
-              <span className={cn(!char.contactsReady && "text-muted-foreground")}>🤝</span>
-              {char.playerDescLink && "🔗"}
-              <span className={cn("text-xs", char.detailsChecked ? "text-green-500" : "text-muted-foreground")}>✓</span>
-              <span className={cn("text-xs", char.contactsChecked ? "text-green-500" : "text-muted-foreground")}>✓</span>
-            </TableCell>
+            <TableCell>{char.writerName}</TableCell>
             <TableCell className="flex gap-2">
               {characterGroups.get(char.id)?.map(group => <Badge key={group.id} variant="secondary">{group.id}</Badge>)}
+            </TableCell>
+            <TableCell className="items-center">
+              <CharacterStatus char={char} />
+            </TableCell>
+            <TableCell><CharacterName character={char} /></TableCell>
+            <TableCell>{char.blurb}</TableCell>
+            <TableCell>
+              {char.playerDescLink ? <a href={char.playerDescLink}>
+                <LinkIcon />
+              </a> : <UnlinkIcon />}
             </TableCell>
           </TableRow>
         )}
@@ -79,6 +85,21 @@ export const CharacterList = () => {
     <Button variant="outline" onClick={newCharacter}>Luo hahmo...</Button>
   </div>;
 };
+
+const CharacterStatus = ({ char }: { char: Character }) => {
+  return <Tooltip>
+    <TooltipTrigger>
+      <div className="flex">
+        <NotebookTabsIcon className={cn(char.detailsReady ? (char.detailsChecked ? "text-green-500" : "text-yellow-500") : "text-gray-500")} />
+        <UserPenIcon className={cn(char.contactsReady ? (char.contactsChecked ? "text-green-500" : "text-yellow-500") : "text-gray-500")} />
+      </div>
+    </TooltipTrigger>
+    <TooltipContent>
+      <p>Ranskalaiset viivat {char.detailsReady ? (char.detailsChecked ? 'tarkastettu' : 'odottaa tarkastusta') : 'kesken'}</p>
+      <p>Kontaktit {char.contactsReady ? (char.contactsChecked ? 'tarkastettu' : 'odottaa tarkastusta') : 'kesken'}</p>
+    </TooltipContent>
+  </Tooltip>
+}
 
 export const CharacterView = ({ id }: { id: string }) => {
   const doc = useContext(PROJECT);

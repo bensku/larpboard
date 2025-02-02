@@ -32,9 +32,9 @@ export const NumberField = <T extends object, K extends keyof T>({ obj, field, l
   </Field>
 }
 
-export const Toggle = <T extends object, K extends keyof T>({ obj, field, label }: { obj: T, field: K, label: string }) => {
+export const Toggle = <T extends object, K extends keyof T>({ obj, field, label, className }: { obj: T, field: K, label: string, className?: string }) => {
   const [value, setValue] = useYjsValue(obj, field);
-  return <div className={cn('flex flex-row space-x-2 mb-2')}>
+  return <div className={cn('flex flex-row space-x-2 mb-2', className)}>
     <Label htmlFor={String(field)} className="ml-3 mb-1">{label}</Label>
     <Checkbox name={String(field)} checked={value as boolean} onCheckedChange={(checked) => setValue(checked as T[K])} />
   </div>

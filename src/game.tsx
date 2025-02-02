@@ -7,6 +7,7 @@ import { useSettings } from './data/settings';
 import { useContext } from 'react';
 import { Button } from './components/ui/button';
 import { SettingsView } from './settings';
+import { TooltipProvider } from './components/ui/tooltip';
 
 export const Game = () => {
   const doc = new Y.Doc();
@@ -30,7 +31,9 @@ export const Game = () => {
 
   return <div className="max-w-5xl ml-auto mr-auto">
     <PROJECT.Provider value={doc}>
-      <App />
+      <TooltipProvider>
+        <App />
+      </TooltipProvider>
     </PROJECT.Provider>
   </div>
 }
