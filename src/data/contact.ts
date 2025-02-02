@@ -21,14 +21,15 @@ const Contact = z.object({
 export type Contact = TypeOf<typeof Contact>;
 
 export function useContacts(doc: Y.Doc, chId: string): Contact[] {
-  return useYjsQuery(doc.getMap('contacts'), Contact, [{ aId: chId }, { bId: chId }], false);
+  // TODO deep watch needed to get drag-sorting working - change if performance degrades
+  return useYjsQuery(doc.getMap('contacts'), Contact, [{ aId: chId }, { bId: chId }], true);
 }
 
 export function getContacts(doc: Y.Doc, chId: string): Contact[] {
   return queryYjs(doc.getMap('contacts'), Contact, [{ aId: chId }, { bId: chId }]);
 }
 
-const posSource = new PositionSource();
+export const posSource = new PositionSource();
 
 export function createContact(doc: Y.Doc, fromId: string, toId: string) {
   let aId: string, bId: string;
@@ -68,4 +69,8 @@ export function sortContacts(chId: string, contacts: Contact[]) {
 
 export function deleteContact(doc: Y.Doc, contact: Contact) {
   deleteData(doc.getMap('contacts'), `${contact.aId}-${contact.bId}`);
+}
+
+export function updateContact(doc: Y.Doc, id: string, contact: Partial<Contact>) {
+  updateData(doc.getMap('contacts'), id, contact, Contact);
 }

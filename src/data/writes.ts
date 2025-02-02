@@ -2,7 +2,8 @@ import * as Y from "yjs";
 import { TypeOf, z } from "zod";
 
 export function updateData<T extends z.ZodObject<any>>(map: Y.Map<unknown>, key: string, data: Partial<TypeOf<T>>, type: T): void {
-  const validated = type.parse(data);
+  // TODO do partial validation, somehow
+  // const validated = type.parse(data);
 
   // Add map and update its content in one transaction
   // Otherwise, shallow useYjsQuery would not see the full change
@@ -16,7 +17,7 @@ export function updateData<T extends z.ZodObject<any>>(map: Y.Map<unknown>, key:
       throw new Error(`Expected Y.Map at key ${key}, got ${target}`);
     }
 
-    for (const [k, v] of Object.entries(validated)) {
+    for (const [k, v] of Object.entries(data)) {
       if (v instanceof Y.Map) {
         // Update map content, do not replace it!
         const oldMap = target.get(k);

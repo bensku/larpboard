@@ -39,7 +39,7 @@ export function useCharacter(doc: Y.Doc, id: string, deep: boolean): Character |
   return useYjsData(doc.getMap('characters'), Character, id, deep);
 }
 
-const posSource = new PositionSource();
+export const posSource = new PositionSource();
 
 export function createCharacter(doc: Y.Doc, id: string): void {
   console.log('Creating character', id);
@@ -66,4 +66,8 @@ export function createCharacter(doc: Y.Doc, id: string): void {
 
 export function deleteCharacter(doc: Y.Doc, id: string): void {
   deleteData(doc.getMap('characters'), id);
+}
+
+export function updateCharacter(doc: Y.Doc, id: string, data: Partial<Character>): void {
+  updateData(doc.getMap('characters'), id, data, Character);
 }
