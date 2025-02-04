@@ -1,0 +1,10 @@
+FROM oven/bun:1 as build
+
+COPY package.json bun.lockb server.ts /app/
+WORKDIR /app
+RUN bun install --frozen-lockfile --production
+
+VOLUME [ "/data" ]
+WORKDIR /data
+
+CMD ["bun", "/app/server.ts"]

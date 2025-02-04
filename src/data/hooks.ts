@@ -123,7 +123,7 @@ export function useYjsValue<T extends object, K extends keyof T>(obj: T, key: K)
       // But on first render, the map won't be available...
       return obj[key];
     }
-    return map.get(key) as T[K];
+    return map.get(key as string) as T[K];
   });
 
   const setValue = (value: T[K]) => {
