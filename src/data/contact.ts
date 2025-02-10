@@ -7,11 +7,11 @@ import { queryYjs } from "./reads";
 
 const Contact = z.object({
   aId: z.string(),
-  aDesc: z.instanceof(Y.Text),
+  aDesc: z.instanceof(Y.XmlFragment),
   aSortKey: z.string(),
 
   bId: z.string(),
-  bDesc: z.instanceof(Y.Text),
+  bDesc: z.instanceof(Y.XmlFragment),
   bSortKey: z.string(),
 
   close: z.boolean(),
@@ -22,7 +22,8 @@ export type Contact = TypeOf<typeof Contact>;
 
 export function useContacts(doc: Y.Doc, chId: string): Contact[] {
   // TODO deep watch needed to get drag-sorting working - change if performance degrades
-  return useYjsQuery(doc.getMap('contacts'), Contact, [{ aId: chId }, { bId: chId }], true);
+  return useYjsQuery(doc.getMap('contacts'), Contact, [{ aId: chId }, { bId: chId }], true,
+    (path) => !path.includes('aDesc') && !path.includes('bDesc'));
 }
 
 export function getContacts(doc: Y.Doc, chId: string): Contact[] {
@@ -48,10 +49,10 @@ export function createContact(doc: Y.Doc, fromId: string, toId: string) {
   // Push the new, empty contact
   updateData(doc.getMap('contacts'), `${aId}-${bId}`, {
     aId,
-    aDesc: new Y.Text(),
+    aDesc: new Y.XmlFragment(),
     aSortKey: posSource.createBetween(aLast?.aId == aId ? aLast.aSortKey : aLast?.bSortKey),
     bId,
-    bDesc: new Y.Text(),
+    bDesc: new Y.XmlFragment(),
     bSortKey: posSource.createBetween(bLast?.aId == bId ? bLast.aSortKey : bLast?.bSortKey),
 
     close: false,

@@ -64,7 +64,8 @@ export function validateOneSidedContacts(doc: Y.Doc, _settings: Settings, charac
       continue; // This was intentional
     }
     const selfDesc = contact.aId == character.id ? contact.aDesc : contact.bDesc;
-    if (selfDesc.toString().trim().length < 5) {
+    const textDesc = selfDesc.toString().replace(/<[^>]*>/g, '').trim();
+    if (textDesc.length < 4) {
       const otherChar = getCharacter(doc, contact.aId == character.id ? contact.bId : contact.aId);
       messages.push(`Yksipuolinen kontakti hahmon ${otherChar.name || otherChar.workName} kanssa`);
     }

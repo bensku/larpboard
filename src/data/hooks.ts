@@ -62,16 +62,31 @@ export function useYjsData<T extends z.ZodObject<any>>(map: Y.Map<unknown>, type
   });
 }
 
-export function useYjsQuery<T extends z.ZodObject<any>>(map: Y.Map<unknown>, type: T, queries: object[], deep: boolean): TypeOf<T>[] {
+export function useYjsQuery<T extends z.ZodObject<any>>(map: Y.Map<unknown>, type: T, queries: object[], deep: boolean, filter?: (path: string[]) => boolean): TypeOf<T>[] {
   const prevDataRef = useRef<any | null>(null);
 
   const observe = deep ? map.observeDeep.bind(map) : map.observe.bind(map);
   const unobserve = deep ? map.unobserveDeep.bind(map) : map.unobserve.bind(map);
 
   return useSyncExternalStore((onChange) => {
-    const handler = () => {
-      prevDataRef.current = null;
-      onChange();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handler = (event: Y.YEvent<any>[] | Y.YMapEvent<unknown>) => {
+      let changed = false;
+      if (Array.isArray(event) && filter) {
+        // If we have a filter function, only note change events that pass it
+        for (const e of event) {
+          if (filter(e.path as string[])) {
+            changed = true;
+            break;
+          }
+        }
+      } else {
+        changed = true;
+      }
+      if (changed) {
+        prevDataRef.current = null;
+        onChange();
+      }
     };
     observe(handler);
     return () => {

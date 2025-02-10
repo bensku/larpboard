@@ -2,8 +2,6 @@ import { useContext, useState } from "react";
 import { PROJECT } from "./data"
 import { Contact, createContact, deleteContact, posSource, sortContacts, updateContact, useContacts } from "./data/contact"
 import { Character, useCharacter, useCharacters } from "./data/character";
-import { Textarea } from "./components/ui/textarea";
-import { useYjsPlainText } from "./data/hooks";
 import { Popover } from "@radix-ui/react-popover";
 import { PopoverContent, PopoverTrigger } from "./components/ui/popover";
 import { Button } from "./components/ui/button";
@@ -16,6 +14,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import { CSS } from "@dnd-kit/utilities";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { closestCenter, DndContext, DragEndEvent } from "@dnd-kit/core";
+import { TextEditor } from "./editor";
 
 export const ContactList = ({ chId }: { chId: string }) => {
   const doc = useContext(PROJECT);
@@ -79,10 +78,6 @@ export const ContactView = ({ contextCh, contact }: { contextCh: string; contact
   // const self = useCharacter(doc, selfFirst ? contact.aId : contact.bId, false);
   const other = useCharacter(doc, selfFirst ? contact.bId : contact.aId, false);
 
-  // Subscribe to description texts separately
-  const [selfDesc, setSelfDesc] = useYjsPlainText(selfFirst ? contact.aDesc : contact.bDesc);
-  const [otherDesc, setOtherDesc] = useYjsPlainText(selfFirst ? contact.bDesc : contact.aDesc);
-
   const {
     attributes,
     listeners,
@@ -130,8 +125,8 @@ export const ContactView = ({ contextCh, contact }: { contextCh: string; contact
       </AlertDialog>
     </div>
     <div className="flex">
-      <Textarea onChange={(event) => setSelfDesc(event.target.value)} value={selfDesc} />
-      <Textarea onChange={(event) => setOtherDesc(event.target.value)} value={otherDesc} />
+      <TextEditor fragment={selfFirst ? contact.aDesc : contact.bDesc} />
+      <TextEditor fragment={selfFirst ? contact.bDesc : contact.aDesc} />
     </div>
   </div>;
 };

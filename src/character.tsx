@@ -296,7 +296,7 @@ const SettingsView = ({ character }: { character: Character }) => {
           <AlertDialogCancel>Peru</AlertDialogCancel>
           <AlertDialogAction onClick={() => {
             deleteCharacter(doc, character.id);
-            navigate('../..');
+            navigate('..');
           }}>Poista hahmo!</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
