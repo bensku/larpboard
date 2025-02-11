@@ -66,4 +66,8 @@
   body {
     @apply bg-background text-foreground;
   }
+  ul, ol {
+    list-style: revert;
+    margin-left: 1em;
+  }
 }
