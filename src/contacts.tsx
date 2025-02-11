@@ -124,7 +124,7 @@ export const ContactView = ({ contextCh, contact }: { contextCh: string; contact
         </AlertDialogContent>
       </AlertDialog>
     </div>
-    <div className="flex">
+    <div className="flex flex-col md:flex-row">
       <TextEditor fragment={selfFirst ? contact.aDesc : contact.bDesc} />
       <TextEditor fragment={selfFirst ? contact.bDesc : contact.aDesc} />
     </div>

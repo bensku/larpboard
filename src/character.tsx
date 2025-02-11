@@ -192,8 +192,8 @@ export const CharacterView = ({ id }: { id: string }) => {
   }
 
   return <div>
-    <h1 className="text-4xl p-2">
-      <input placeholder="Hahmon nimi" value={name} onChange={(event) => setName(event.target.value)} className="outline-none max-w-md" />
+    <h1 className="text-4xl p-2 overflow-clip">
+      <input placeholder="Hahmon nimi" value={name} onChange={(event) => setName(event.target.value)} className="outline-none" />
     </h1>
     <Tabs defaultValue="details">
       <TabsList>
