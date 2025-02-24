@@ -19,7 +19,7 @@ export const Field = ({
   return (
     <div
       className={cn(
-        'flex flex-col space-x-2 mb-2 pr-2 overflow-clip',
+        'flex flex-col space-x-2 pb-2 pr-3 overflow-clip',
         grow && 'flex-grow',
       )}
     >

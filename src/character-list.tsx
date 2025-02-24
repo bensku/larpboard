@@ -25,10 +25,10 @@ import {
 } from './components/ui/table';
 import { navigate } from 'wouter/use-browser-location';
 import { Button } from './components/ui/button';
-import { Badge } from './components/ui/badge';
 import { GripVerticalIcon, LinkIcon, UnlinkIcon } from 'lucide-react';
 import { Link } from 'wouter';
 import { CharacterName, CharacterStatus } from './character';
+import { BadgeGroup } from './badge';
 
 const SortableRow = ({
   id,
@@ -138,11 +138,7 @@ export const CharacterList = () => {
                 <SortableRow key={char.id} id={char.id}>
                   <TableCell>{char.writerName}</TableCell>
                   <TableCell className="flex gap-2">
-                    {characterGroups.get(char.id)?.map((group) => (
-                      <Badge key={group.id} variant="secondary">
-                        {group.id}
-                      </Badge>
-                    ))}
+                    <BadgeGroup groups={characterGroups.get(char.id) ?? []} />
                   </TableCell>
                   <TableCell className="items-center">
                     <CharacterStatus char={char} />

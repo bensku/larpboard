@@ -34,7 +34,7 @@ import {
 } from './components/ui/tooltip';
 import { NotebookTabsIcon, UserPenIcon } from 'lucide-react';
 import { cn } from './lib/utils';
-import { Badge } from './components/ui/badge';
+import { BadgeGroup } from './badge';
 
 export const CharacterView = ({ id }: { id: string }) => {
   const doc = useContext(PROJECT);
@@ -181,18 +181,6 @@ const ContactsView = ({ character }: { character: Character }) => {
   );
 };
 
-export const GroupBadges = ({ groups }: { groups: Tag[] }) => {
-  return (
-    <div>
-      {groups.map((group) => (
-        <Badge key={group.id} variant="secondary">
-          {group.id}
-        </Badge>
-      ))}
-    </div>
-  );
-};
-
 export const CharacterStatus = ({
   char,
   className,
@@ -293,11 +281,16 @@ const SettingsView = ({ character }: { character: Character }) => {
 
 export const CharacterName = ({ character }: { character: Character }) => {
   if (character.name.length == 0) {
-    return <>{character.workName}</>;
+    return (
+      <>
+        <span className="text-gray-600">{character.workName}</span> (työnimi)
+      </>
+    );
   }
   return (
     <>
-      {character.name} ({character.workName})
+      {character.name} (
+      <span className="text-gray-600">{character.workName}</span>)
     </>
   );
 };
@@ -320,7 +313,7 @@ export const CharacterCard = ({ character }: { character: Character }) => {
         <CharacterName character={character} />
       </h1>
       <div className="flex">
-        <GroupBadges groups={groupTags} />
+        <BadgeGroup groups={groupTags} />
         <CharacterStatus char={character} className="flex-1 flex justify-end" />
       </div>
       <TextEditor fragment={character.details} editable={false} />

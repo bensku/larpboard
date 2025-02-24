@@ -13,7 +13,12 @@ import { Character, useCharacter, useCharacters } from './data/character';
 import { Popover } from '@radix-ui/react-popover';
 import { PopoverContent, PopoverTrigger } from './components/ui/popover';
 import { Button } from './components/ui/button';
-import { ChevronsUpDown, CircleXIcon, GripVerticalIcon } from 'lucide-react';
+import {
+  ChevronsUpDown,
+  ExternalLinkIcon,
+  GripVerticalIcon,
+  Trash2Icon,
+} from 'lucide-react';
 import {
   Command,
   CommandEmpty,
@@ -144,7 +149,6 @@ export const ContactView = ({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    cursor: 'grab',
     touchAction: 'none',
   };
 
@@ -158,12 +162,20 @@ export const ContactView = ({
         <div {...attributes} {...listeners}>
           <GripVerticalIcon />
         </div>
+        <a
+          href={other.id}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-shrink-0"
+        >
+          <ExternalLinkIcon className="h-5 w-5" />
+        </a>
         <h3 className="flex-grow">
           <HoverCard>
             <HoverCardTrigger>
               <CharacterName character={other} />
             </HoverCardTrigger>
-            <HoverCardContent>
+            <HoverCardContent className="w-96">
               <CharacterCard character={other} />
             </HoverCardContent>
           </HoverCard>
@@ -173,7 +185,7 @@ export const ContactView = ({
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="ghost" size="icon" className="h-6 w-6">
-              <CircleXIcon />
+              <Trash2Icon />
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
