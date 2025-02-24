@@ -1,7 +1,12 @@
-import * as Y from "yjs";
-import { TypeOf, z } from "zod";
+import * as Y from 'yjs';
+import { TypeOf, z } from 'zod';
 
-export function updateData<T extends z.ZodObject<any>>(map: Y.Map<unknown>, key: string, data: Partial<TypeOf<T>>, _type: T): void {
+export function updateData<T extends z.ZodObject<any>>(
+  map: Y.Map<unknown>,
+  key: string,
+  data: Partial<TypeOf<T>>,
+  _type: T,
+): void {
   // TODO do partial validation, somehow
   // const validated = type.parse(data);
 

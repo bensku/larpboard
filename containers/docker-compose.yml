@@ -9,7 +9,7 @@ services:
   frontend:
     image: ${FRONTEND_IMAGE}
     ports:
-      - "8080:80"
+      - '8080:80'
 
 volumes:
   database:

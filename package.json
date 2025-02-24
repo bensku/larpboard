@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@hocuspocus/extension-sqlite": "^2.15.1",
@@ -48,6 +49,7 @@
     "lucide-react": "^0.436.0",
     "position-strings": "^2.0.1",
     "postcss": "^8.4.41",
+    "prettier": "^3.5.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-yjs": "^2.0.0",

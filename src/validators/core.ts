@@ -1,18 +1,29 @@
-import { Character } from "@/data/character";
-import { getSettings, Settings } from "@/data/settings";
-import * as Y from "yjs";
+import { Character } from '@/data/character';
+import { getSettings, Settings } from '@/data/settings';
+import * as Y from 'yjs';
 
 export interface ValidationResult {
   pass: boolean;
   messages: string[];
 }
 
-export type Validator = (doc: Y.Doc, settings: Settings, character: Character) => ValidationResult;
+export type Validator = (
+  doc: Y.Doc,
+  settings: Settings,
+  character: Character,
+) => ValidationResult;
 
-export function validate(doc: Y.Doc, character: Character, validators: Validator[]): ValidationResult {
+export function validate(
+  doc: Y.Doc,
+  character: Character,
+  validators: Validator[],
+): ValidationResult {
   const settings = getSettings(doc);
   if (!settings) {
-    return { pass: false, messages: ['Pelin asetusten lataaminen epäonnistui!'] };
+    return {
+      pass: false,
+      messages: ['Pelin asetusten lataaminen epäonnistui!'],
+    };
   }
   let pass = true;
   let messages: string[] = [];

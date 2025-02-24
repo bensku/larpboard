@@ -35,7 +35,11 @@ export function getCharacter(doc: Y.Doc, id: string): Character {
   return getYObject(doc.getMap('characters'), id, Character);
 }
 
-export function useCharacter(doc: Y.Doc, id: string, deep: boolean): Character | undefined {
+export function useCharacter(
+  doc: Y.Doc,
+  id: string,
+  deep: boolean,
+): Character | undefined {
   return useYjsData(doc.getMap('characters'), Character, id, deep);
 }
 
@@ -44,30 +48,40 @@ export const posSource = new PositionSource();
 export function createCharacter(doc: Y.Doc, id: string): void {
   console.log('Creating character', id);
   const lastCh = queryYjs(doc.getMap('characters'), Character, [{}])
-    .sort((a, b) => a.sortKey.localeCompare(b.sortKey)).at(-1);
+    .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
+    .at(-1);
 
-  updateData(doc.getMap('characters'), id, {
+  updateData(
+    doc.getMap('characters'),
     id,
-    sortKey: posSource.createBetween(lastCh?.sortKey),
-    name: '',
-    workName: 'Uusi hahmo',
-    writerName: '',
-    blurb: '',
-    details: new Y.XmlFragment(),
-    playerDescLink: '',
-    detailsReady: false,
-    contactsReady: false,
-    detailsChecked: false,
-    contactsChecked: false,
-    ignoreContactCounts: false,
-    ignoreMissingGroupContacts: false
-  }, Character);
+    {
+      id,
+      sortKey: posSource.createBetween(lastCh?.sortKey),
+      name: '',
+      workName: 'Uusi hahmo',
+      writerName: '',
+      blurb: '',
+      details: new Y.XmlFragment(),
+      playerDescLink: '',
+      detailsReady: false,
+      contactsReady: false,
+      detailsChecked: false,
+      contactsChecked: false,
+      ignoreContactCounts: false,
+      ignoreMissingGroupContacts: false,
+    },
+    Character,
+  );
 }
 
 export function deleteCharacter(doc: Y.Doc, id: string): void {
   deleteData(doc.getMap('characters'), id);
 }
 
-export function updateCharacter(doc: Y.Doc, id: string, data: Partial<Character>): void {
+export function updateCharacter(
+  doc: Y.Doc,
+  id: string,
+  data: Partial<Character>,
+): void {
   updateData(doc.getMap('characters'), id, data, Character);
 }

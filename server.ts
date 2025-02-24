@@ -1,5 +1,5 @@
-import { Hocuspocus } from "@hocuspocus/server";
-import { SQLite } from "@hocuspocus/extension-sqlite";
+import { Hocuspocus } from '@hocuspocus/server';
+import { SQLite } from '@hocuspocus/extension-sqlite';
 
 const server = new Hocuspocus({
   port: process.env.PORT ? parseInt(process.env.PORT, 10) : 8080,
@@ -12,8 +12,8 @@ const server = new Hocuspocus({
   extensions: [
     new SQLite({
       database: 'larpboard.sqlite',
-    })
-  ]
+    }),
+  ],
 });
 
 server.listen();

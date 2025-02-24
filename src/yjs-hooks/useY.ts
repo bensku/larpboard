@@ -1,6 +1,6 @@
-import { equalityDeep } from "lib0/function";
-import { useRef, useSyncExternalStore } from "react";
-import * as Y from "yjs";
+import { equalityDeep } from 'lib0/function';
+import { useRef, useSyncExternalStore } from 'react';
+import * as Y from 'yjs';
 
 export type YJsonPrimitive = string | number | boolean | null | Uint8Array;
 
@@ -22,7 +22,7 @@ type YTypeToJson<YType> =
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useY<YType extends Y.AbstractType<any>>(
-  yData: YType
+  yData: YType,
 ): YTypeToJson<YType> {
   const prevDataRef = useRef<YJsonValue | null>(null);
   return useSyncExternalStore(
@@ -40,30 +40,30 @@ export function useY<YType extends Y.AbstractType<any>>(
         return prevDataRef.current;
       }
     },
-    () => yData.toJSON()
+    () => yData.toJSON(),
   );
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useShallowY<YType extends Y.AbstractType<any>>(
-    yData: YType
-  ): YTypeToJson<YType> {
-    const prevDataRef = useRef<YJsonValue | null>(null);
-    return useSyncExternalStore(
-      (callback) => {
-        yData.observe(callback);
-        return () => yData.unobserve(callback);
-      },
-      // Note: React requires reference equality
-      () => {
-        const data = yData.toJSON();
-        if (equalityDeep(prevDataRef.current, data)) {
-          return prevDataRef.current;
-        } else {
-          prevDataRef.current = data;
-          return prevDataRef.current;
-        }
-      },
-      () => yData.toJSON()
-    );
-  }
+  yData: YType,
+): YTypeToJson<YType> {
+  const prevDataRef = useRef<YJsonValue | null>(null);
+  return useSyncExternalStore(
+    (callback) => {
+      yData.observe(callback);
+      return () => yData.unobserve(callback);
+    },
+    // Note: React requires reference equality
+    () => {
+      const data = yData.toJSON();
+      if (equalityDeep(prevDataRef.current, data)) {
+        return prevDataRef.current;
+      } else {
+        prevDataRef.current = data;
+        return prevDataRef.current;
+      }
+    },
+    () => yData.toJSON(),
+  );
+}

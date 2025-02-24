@@ -1,8 +1,8 @@
-import { TypeOf, z } from "zod";
-import * as Y from "yjs";
-import { useYjsQuery } from "./hooks";
-import { updateData } from "./writes";
-import { getYObject, queryYjs } from "./reads";
+import { TypeOf, z } from 'zod';
+import * as Y from 'yjs';
+import { useYjsQuery } from './hooks';
+import { updateData } from './writes';
+import { getYObject, queryYjs } from './reads';
 
 const Tag = z.object({
   id: z.string(),
@@ -18,7 +18,8 @@ export function useAllTags(doc: Y.Doc): Tag[] {
 
 export function useTags(doc: Y.Doc, chId: string): [Tag[], Tag[]] {
   const allTags = useYjsQuery(doc.getMap('tags'), Tag, [{}], true);
-  const current: Tag[] = [], available: Tag[] = [];
+  const current: Tag[] = [],
+    available: Tag[] = [];
   for (const tag of allTags) {
     if (tag.characters.has(chId)) {
       current.push(tag);
@@ -31,7 +32,8 @@ export function useTags(doc: Y.Doc, chId: string): [Tag[], Tag[]] {
 
 export function getTags(doc: Y.Doc, chId: string): [Tag[], Tag[]] {
   const allTags = queryYjs(doc.getMap('tags'), Tag, [{}]);
-  const current: Tag[] = [], available: Tag[] = [];
+  const current: Tag[] = [],
+    available: Tag[] = [];
   for (const tag of allTags) {
     if (tag.characters.has(chId)) {
       current.push(tag);
@@ -44,10 +46,15 @@ export function getTags(doc: Y.Doc, chId: string): [Tag[], Tag[]] {
 
 export function addTag(doc: Y.Doc, chId: string, tag: Omit<Tag, 'characters'>) {
   // Update tag data or create it
-  updateData(doc.getMap('tags'), tag.id, {
-    ...tag,
-    characters: new Y.Map(),
-  }, Tag);
+  updateData(
+    doc.getMap('tags'),
+    tag.id,
+    {
+      ...tag,
+      characters: new Y.Map(),
+    },
+    Tag,
+  );
 
   const tagDef = getYObject(doc.getMap('tags'), tag.id, Tag);
   tagDef.characters.set(chId, true); // Add character as member

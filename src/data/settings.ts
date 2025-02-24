@@ -1,8 +1,8 @@
-import { z } from "zod";
-import { getYObject } from "./reads";
-import * as Y from "yjs";
-import { updateData } from "./writes";
-import { useYjsData } from "./hooks";
+import { z } from 'zod';
+import { getYObject } from './reads';
+import * as Y from 'yjs';
+import { updateData } from './writes';
+import { useYjsData } from './hooks';
 
 const Settings = z.object({
   name: z.string(),
@@ -29,11 +29,16 @@ export function useSettings(doc: Y.Doc): Settings | undefined {
 
 export function resetSettings(doc: Y.Doc) {
   const map = doc.getMap('settings');
-  updateData(map, 'settings', {
-    name: 'Nimetön peli',
-    minContacts: 6,
-    maxContacts: 15,
-    minCloseContacts: 3,
-    maxCloseContacts: 6
-  }, Settings)
+  updateData(
+    map,
+    'settings',
+    {
+      name: 'Nimetön peli',
+      minContacts: 6,
+      maxContacts: 15,
+      minCloseContacts: 3,
+      maxCloseContacts: 6,
+    },
+    Settings,
+  );
 }
