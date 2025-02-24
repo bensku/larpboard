@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import { Character, deleteCharacter, useCharacter } from "./data/character";
 import { useYjsValue } from "./data/hooks";
 import { TagInput } from "emblor";
-import { addTag, removeTag, useTags } from "./data/tag";
+import { addTag, removeTag, Tag, useAllTags, useTags } from "./data/tag";
 import { PROJECT } from "./data";
 import { ContactList } from "./contacts";
 import { navigate } from "wouter/use-browser-location";
@@ -14,6 +14,10 @@ import { validate } from "./validators/core";
 import { validateContactCount, validateGroupContacts, validateOneSidedContacts } from "./validators/contact";
 import { Alert } from "./components/ui/alert";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle, AlertDialogTrigger } from "./components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
+import { NotebookTabsIcon, UserPenIcon } from "lucide-react";
+import { cn } from "./lib/utils";
+import { Badge } from "./components/ui/badge";
 
 export const CharacterView = ({ id }: { id: string }) => {
   const doc = useContext(PROJECT);
@@ -83,7 +87,7 @@ const DetailsView = ({ character }: { character: Character }) => {
     </FieldGroup>
     <FieldGroup>
       <Field id="description" label="Pelinjohdon kuvaus" grow>
-        <TextEditor fragment={character.details} />
+        <TextEditor fragment={character.details} editable={true} />
       </Field>
     </FieldGroup>
   </div>
@@ -109,6 +113,27 @@ const ContactsView = ({ character }: { character: Character }) => {
   </div>
 }
 
+export const GroupBadges = ({ groups }: { groups: Tag[] }) => {
+  return <div>
+    {groups.map(group => <Badge key={group.id} variant="secondary">{group.id}</Badge>)}
+  </div>
+}
+
+export const CharacterStatus = ({ char, className }: { char: Character, className?: string }) => {
+  return <Tooltip>
+    <TooltipTrigger className={className}>
+      <div className="flex">
+        <NotebookTabsIcon className={cn(char.detailsReady ? (char.detailsChecked ? "text-green-500" : "text-yellow-500") : "text-gray-500")} />
+        <UserPenIcon className={cn(char.contactsReady ? (char.contactsChecked ? "text-green-500" : "text-yellow-500") : "text-gray-500")} />
+      </div>
+    </TooltipTrigger>
+    <TooltipContent>
+      <p>Ranskalaiset viivat {char.detailsReady ? (char.detailsChecked ? 'tarkastettu' : 'odottaa tarkastusta') : 'kesken'}</p>
+      <p>Kontaktit {char.contactsReady ? (char.contactsChecked ? 'tarkastettu' : 'odottaa tarkastusta') : 'kesken'}</p>
+    </TooltipContent>
+  </Tooltip>
+}
+
 const SettingsView = ({ character }: { character: Character }) => {
   const doc = useContext(PROJECT);
   return <div>
@@ -123,7 +148,7 @@ const SettingsView = ({ character }: { character: Character }) => {
       <AlertDialogContent>
         <AlertDialogTitle>Haluatko varmasti poistaa hahmon <CharacterName character={character} />?</AlertDialogTitle>
         <AlertDialogDescription>
-          Hahmon poistaminen on peruuttamaton toimi.
+          Hahmon poistamista <b>ei voi perua</b>!
         </AlertDialogDescription>
         <AlertDialogFooter>
           <AlertDialogCancel>Peru</AlertDialogCancel>
@@ -142,4 +167,28 @@ export const CharacterName = ({character}: {character: Character}) => {
     return <>{character.workName}</>
   }
   return <>{character.name} ({character.workName})</>;
+}
+
+export const CharacterCard = ({ character }: { character: Character }) => {
+  const doc = useContext(PROJECT);
+
+  const groupTags: Tag[] = [];
+  const allTags = useAllTags(doc);
+  const groups = allTags.filter(tag => tag.type == 'group');
+  for (const group of groups) {
+    if (group.characters.has(character.id)) {
+      groupTags.push(group);
+    }
+  }
+
+  return <div className="flex flex-col gap-2">
+    <h1 className="text-xl">
+      <CharacterName character={character} />
+    </h1>
+    <div className="flex">
+      <GroupBadges groups={groupTags} />
+      <CharacterStatus char={character} className="flex-1 flex justify-end" />
+    </div>
+    <TextEditor fragment={character.details} editable={false} />
+  </div>
 }

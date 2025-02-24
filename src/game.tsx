@@ -1,13 +1,14 @@
 import * as Y from 'yjs';
 import { PROJECT } from './data'
 import { Link, Route, Switch } from 'wouter';
-import { CharacterList, CharacterView } from './character';
+import { CharacterView } from './character';
 import { useSettings } from './data/settings';
 import { useContext, useEffect, useState } from 'react';
 import { Button } from './components/ui/button';
 import { SettingsView } from './settings';
 import { TooltipProvider } from './components/ui/tooltip';
 import { HocuspocusProvider } from "@hocuspocus/provider";
+import { CharacterList } from './character-list';
 
 export const Game = () => {
 

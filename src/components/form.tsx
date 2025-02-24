@@ -6,7 +6,7 @@ import { useYjsValue } from "@/data/hooks";
 import { Checkbox } from "./ui/checkbox";
 
 export const Field = ({ id, label, children, grow }: { id: string; label: string; children: ReactNode; grow?: boolean }) => {
-  return <div className={cn('flex flex-col space-x-2 mb-2 overflow-clip', grow && 'flex-grow')}>
+  return <div className={cn('flex flex-col space-x-2 mb-2 pr-2 overflow-clip', grow && 'flex-grow')}>
     <Label htmlFor={id} className="ml-3 mb-1">{label}</Label>
     {children}
   </div>

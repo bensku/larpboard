@@ -1,4 +1,3 @@
-import { cn } from "./lib/utils";
 import { useContext } from "react";
 import {
   DndContext,
@@ -12,17 +11,16 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { Character, createCharacter, posSource, updateCharacter, useCharacters } from "./data/character";
+import { createCharacter, posSource, updateCharacter, useCharacters } from "./data/character";
 import { Tag, useAllTags } from "./data/tag";
 import { PROJECT } from "./data";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./components/ui/table";
 import { navigate } from "wouter/use-browser-location";
 import { Button } from "./components/ui/button";
 import { Badge } from "./components/ui/badge";
-import { GripVerticalIcon, LinkIcon, NotebookTabsIcon, UnlinkIcon, UserPenIcon } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
+import { GripVerticalIcon, LinkIcon, UnlinkIcon } from "lucide-react";
 import { Link } from "wouter";
-import { CharacterName } from "./character";
+import { CharacterName, CharacterStatus } from "./character";
 
 const SortableRow = ({ id, children }: { id: string; children: React.ReactNode }) => {
   const {
@@ -158,18 +156,4 @@ export const CharacterList = () => {
   </div>;
 };
 
-const CharacterStatus = ({ char }: { char: Character }) => {
-  return <Tooltip>
-    <TooltipTrigger>
-      <div className="flex">
-        <NotebookTabsIcon className={cn(char.detailsReady ? (char.detailsChecked ? "text-green-500" : "text-yellow-500") : "text-gray-500")} />
-        <UserPenIcon className={cn(char.contactsReady ? (char.contactsChecked ? "text-green-500" : "text-yellow-500") : "text-gray-500")} />
-      </div>
-    </TooltipTrigger>
-    <TooltipContent>
-      <p>Ranskalaiset viivat {char.detailsReady ? (char.detailsChecked ? 'tarkastettu' : 'odottaa tarkastusta') : 'kesken'}</p>
-      <p>Kontaktit {char.contactsReady ? (char.contactsChecked ? 'tarkastettu' : 'odottaa tarkastusta') : 'kesken'}</p>
-    </TooltipContent>
-  </Tooltip>
-}
 

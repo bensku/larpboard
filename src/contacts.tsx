@@ -7,7 +7,7 @@ import { PopoverContent, PopoverTrigger } from "./components/ui/popover";
 import { Button } from "./components/ui/button";
 import { ChevronsUpDown, CircleXIcon, GripVerticalIcon } from "lucide-react";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "./components/ui/command";
-import { CharacterName } from "./character";
+import { CharacterCard, CharacterName } from "./character";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogTitle, AlertDialogTrigger } from "./components/ui/alert-dialog";
 import { Toggle } from "./components/form";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -15,6 +15,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { closestCenter, DndContext, DragEndEvent } from "@dnd-kit/core";
 import { TextEditor } from "./editor";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "./components/ui/hover-card";
 
 export const ContactList = ({ chId }: { chId: string }) => {
   const doc = useContext(PROJECT);
@@ -102,7 +103,16 @@ export const ContactView = ({ contextCh, contact }: { contextCh: string; contact
       <div {...attributes} {...listeners}>
         <GripVerticalIcon />
       </div>
-      <h3 className="flex-grow"><CharacterName character={other} /></h3>
+      <h3 className="flex-grow">
+        <HoverCard>
+          <HoverCardTrigger>
+            <CharacterName character={other} />
+          </HoverCardTrigger>
+          <HoverCardContent>
+            <CharacterCard character={other} />
+          </HoverCardContent>
+        </HoverCard>
+      </h3>
       <Toggle obj={contact} field="close" label="Lähikohtakti" />
       <Toggle obj={contact} field="oneSided" label="Yksipuolinen" />
       <AlertDialog>
@@ -125,8 +135,8 @@ export const ContactView = ({ contextCh, contact }: { contextCh: string; contact
       </AlertDialog>
     </div>
     <div className="flex flex-col md:flex-row">
-      <TextEditor fragment={selfFirst ? contact.aDesc : contact.bDesc} />
-      <TextEditor fragment={selfFirst ? contact.bDesc : contact.aDesc} />
+      <TextEditor fragment={selfFirst ? contact.aDesc : contact.bDesc} editable={true} />
+      <TextEditor fragment={selfFirst ? contact.bDesc : contact.aDesc} editable={true} />
     </div>
   </div>;
 };
