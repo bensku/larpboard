@@ -310,6 +310,16 @@ export const CharacterCard = ({ character }: { character: Character }) => {
     }
   }
 
+  return <FastCharacterCard character={character} groupTags={groupTags} />;
+};
+
+export const FastCharacterCard = ({
+  character,
+  groupTags,
+}: {
+  character: Character;
+  groupTags: Tag[];
+}) => {
   return (
     <div className="flex flex-col gap-2">
       <h1 className="text-xl">

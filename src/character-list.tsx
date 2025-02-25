@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useLayoutEffect, useState } from 'react';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -8,6 +8,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
+  Character,
   createCharacter,
   posSource,
   updateCharacter,
@@ -27,8 +28,14 @@ import { navigate } from 'wouter/use-browser-location';
 import { Button } from './components/ui/button';
 import { GripVerticalIcon, LinkIcon, UnlinkIcon } from 'lucide-react';
 import { Link } from 'wouter';
-import { CharacterName, CharacterStatus } from './character';
+import {
+  CharacterName,
+  CharacterStatus,
+  FastCharacterCard,
+} from './character';
 import { BadgeGroup } from './badge';
+import { Checkbox } from './components/ui/checkbox';
+import { Label } from './components/ui/label';
 
 const SortableRow = ({
   id,
@@ -63,6 +70,12 @@ export const CharacterList = () => {
   const doc = useContext(PROJECT);
   const characters = useCharacters(doc);
   characters.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+
+  const [cardMode, setCardMode] = useState(false);
+
+  useLayoutEffect(() => {
+    setCardMode(localStorage.getItem('characterList.cardMode') === 'true');
+  }, []);
 
   // Figure out what tags we have and which characters they belong to
   // For now, only do this for groups - might have other tags later
@@ -111,6 +124,52 @@ export const CharacterList = () => {
     });
   };
 
+  return (
+    <div className="pl-3 pr-3">
+      <div className="flex items-center gap-4 p-4">
+        <div>Yhteensä {characters.length} hahmoa.</div>
+        <Button variant="outline" onClick={newCharacter}>
+          Luo hahmo...
+        </Button>
+        <div className="flex flex-row space-x-2 mb-2">
+          <Label htmlFor={'cardMode'} className="ml-3 mb-1">
+            Näytä kortteina
+          </Label>
+          <Checkbox
+            name="cardMode"
+            checked={cardMode}
+            onCheckedChange={(checked) => {
+              setCardMode(!!checked);
+              localStorage.setItem(
+                'characterList.cardMode',
+                checked ? 'true' : 'false',
+              );
+            }}
+          />
+        </div>
+      </div>
+      {cardMode ? (
+        <CardView characters={characters} characterGroups={characterGroups} />
+      ) : (
+        <ListView
+          characters={characters}
+          characterGroups={characterGroups}
+          handleDragEnd={handleDragEnd}
+        />
+      )}
+    </div>
+  );
+};
+
+const ListView = ({
+  characters,
+  characterGroups,
+  handleDragEnd,
+}: {
+  characters: Character[];
+  characterGroups: Map<string, Tag[]>;
+  handleDragEnd: (event: DragEndEvent) => void;
+}) => {
   return (
     <div>
       <DndContext
@@ -162,10 +221,34 @@ export const CharacterList = () => {
           </SortableContext>
         </Table>
       </DndContext>
-      <div>Yhteensä {characters.length} hahmoa.</div>
-      <Button variant="outline" onClick={newCharacter}>
-        Luo hahmo...
-      </Button>
+    </div>
+  );
+};
+
+const CardView = ({
+  characters,
+  characterGroups,
+}: {
+  characters: Character[];
+  characterGroups: Map<string, Tag[]>;
+}) => {
+  return (
+    <div className="flex flex-wrap">
+      {characters.map((char) => (
+        <div
+          key={char.id}
+          className="w-96 bg-gray-50 rounded-lg shadow-md p-2 m-2"
+        >
+          <Link to={`/characters/${char.id}`}>
+            <div className="h-56 overflow-hidden">
+              <FastCharacterCard
+                character={char}
+                groupTags={characterGroups.get(char.id) ?? []}
+              />
+            </div>
+          </Link>
+        </div>
+      ))}
     </div>
   );
 };
