@@ -158,16 +158,11 @@ export const ContactView = ({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <div className="flex m-2 ml-0 gap-2">
+      <div className="flex m-2 ml-0 gap-2 flex-wrap">
         <div {...attributes} {...listeners}>
           <GripVerticalIcon />
         </div>
-        <a
-          href={other.id}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-shrink-0"
-        >
+        <a href={other.id} target="_blank" className="flex-shrink-0">
           <ExternalLinkIcon className="h-5 w-5" />
         </a>
         <h3 className="flex-grow">
@@ -180,8 +175,10 @@ export const ContactView = ({
             </HoverCardContent>
           </HoverCard>
         </h3>
-        <Toggle obj={contact} field="close" label="Lähikohtakti" />
-        <Toggle obj={contact} field="oneSided" label="Yksipuolinen" />
+        <div className="flex">
+          <Toggle obj={contact} field="close" label="Lähikohtakti" />
+          <Toggle obj={contact} field="oneSided" label="Yksipuolinen" />
+        </div>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="ghost" size="icon" className="h-6 w-6">

@@ -46,8 +46,8 @@ export const CharacterView = ({ id }: { id: string }) => {
   }
 
   return (
-    <div>
-      <h1 className="text-4xl p-2 overflow-clip">
+    <div className="max-w-5xl ml-auto mr-auto">
+      <h1 className="text-4xl p-2">
         <input
           placeholder="Hahmon nimi"
           value={name}
@@ -283,14 +283,17 @@ export const CharacterName = ({ character }: { character: Character }) => {
   if (character.name.length == 0) {
     return (
       <>
-        <span className="text-gray-600">{character.workName}</span> (työnimi)
+        <span className="text-gray-600">{character.workName}</span>{' '}
+        <span>(työnimi)</span>
       </>
     );
   }
   return (
     <>
-      {character.name} (
-      <span className="text-gray-600">{character.workName}</span>)
+      <span>{character.name}</span>{' '}
+      <span>
+        (<span className="text-gray-600">{character.workName}</span>)
+      </span>
     </>
   );
 };

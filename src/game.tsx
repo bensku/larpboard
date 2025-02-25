@@ -9,10 +9,11 @@ import { SettingsView } from './settings';
 import { TooltipProvider } from './components/ui/tooltip';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import { CharacterList } from './character-list';
+import { ContactGraph } from './contact-graph';
 
 export const Game = () => {
   return (
-    <div className="max-w-5xl ml-auto mr-auto">
+    <div>
       <Switch>
         <Route path="/:project/:authToken" nest>
           {({ project, authToken }) => (
@@ -62,17 +63,22 @@ const App = () => {
 
   return (
     <div>
-      <div className="flex p-2 m-1 border-b-2">
+      <div className="flex p-2 m-1 border-b-2 max-w-5xl ml-auto mr-auto flex-wrap">
         <Link to={`/`}>
           <h1 className="text-4xl mr-5">{settings?.name}</h1>
         </Link>
 
-        <Link to={`/`}>
-          <Button variant="outline">Hahmot</Button>
-        </Link>
-        <Link to={'/settings'}>
-          <Button variant="outline">Asetukset</Button>
-        </Link>
+        <div className="flex">
+          <Link to={`/`}>
+            <Button variant="outline">Hahmot</Button>
+          </Link>
+          <Link to={'/settings'}>
+            <Button variant="outline">Asetukset</Button>
+          </Link>
+          <Link to={'/graph'}>
+            <Button variant="outline">Kontaktit</Button>
+          </Link>
+        </div>
       </div>
       <Switch>
         <Route path="/characters/:id">
@@ -80,6 +86,12 @@ const App = () => {
         </Route>
         <Route path="/settings">
           <SettingsView />
+        </Route>
+        <Route path="/graph/:id">
+          {({ id }) => <ContactGraph centerOn={id} />}
+        </Route>
+        <Route path="/graph">
+          <ContactGraph />
         </Route>
         <Route>
           <CharacterList />

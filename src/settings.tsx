@@ -13,7 +13,7 @@ export const SettingsView = () => {
   }
 
   return (
-    <div>
+    <div className="max-w-5xl ml-auto mr-auto">
       <FieldGroup>
         <TextField obj={settings} field="name" label="Pelin nimi" grow />
       </FieldGroup>

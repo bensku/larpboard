@@ -96,9 +96,15 @@ function calculateContrastColor(backgroundColor: string) {
   return brightness > 55 ? '#000000' : '#ffffff';
 }
 
-export const BadgeGroup = ({ groups }: { groups: Tag[] }) => {
+export const BadgeGroup = ({
+  groups,
+  className,
+}: {
+  groups: Tag[];
+  className?: string;
+}) => {
   return (
-    <div>
+    <div className={className}>
       {groups.length > 0 ? (
         groups.map((group) => (
           <Badge

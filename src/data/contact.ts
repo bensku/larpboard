@@ -31,6 +31,10 @@ export function useContacts(doc: Y.Doc, chId: string): Contact[] {
   );
 }
 
+export function useAllContacts(doc: Y.Doc): Contact[] {
+  return useYjsQuery(doc.getMap('contacts'), Contact, [{}], true);
+}
+
 export function getContacts(doc: Y.Doc, chId: string): Contact[] {
   return queryYjs(doc.getMap('contacts'), Contact, [
     { aId: chId },
