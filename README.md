@@ -28,7 +28,7 @@ is that everything from text fields to reorderable lists allows multiple
 people to change things simultaneously without breaking anything.
 Well, _mostly_ without breaking anything.
 
-> Caution! Pre-alpha software; if it breaks, you can keep the pieces!
+> Caution! Alpha-quality software; if it breaks, you can keep the pieces!
 
 ## Installation
 
@@ -51,5 +51,7 @@ LARPBOARD_TOKEN_test=foo
 ... and then you can visit the project `test` using the following "secret" link:
 [http://localhost:5173/test/foo](http://localhost:5173/test/foo)
 
-For production, you should probably use containers. Images and deployment
-instructions for them coming soon!
+For production, you should use containers. CI in this repository builds and
+pushes them to [Github packages](https://github.com/bensku?tab=packages&repo_name=larpboard)
+automatically. A skeleton [`docker-compose.yml`](/containers/docker-compose.yml)
+is provided for reference.
