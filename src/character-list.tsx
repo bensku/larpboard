@@ -28,11 +28,7 @@ import { navigate } from 'wouter/use-browser-location';
 import { Button } from './components/ui/button';
 import { GripVerticalIcon, LinkIcon, UnlinkIcon } from 'lucide-react';
 import { Link } from 'wouter';
-import {
-  CharacterName,
-  CharacterStatus,
-  FastCharacterCard,
-} from './character';
+import { CharacterName, CharacterStatus, FastCharacterCard } from './character';
 import { BadgeGroup } from './badge';
 import { Checkbox } from './components/ui/checkbox';
 import { Label } from './components/ui/label';
@@ -183,7 +179,7 @@ const ListView = ({
               <TableHead className="w-[120px]">Kirjoittaja</TableHead>
               <TableHead className="w-[150px]">Ryhmät</TableHead>
               <TableHead className="w-[150px]">Status</TableHead>
-              <TableHead className="w-[250px]">Nimi</TableHead>
+              <TableHead className="w-[320px]">Nimi</TableHead>
               <TableHead>Hahmo hyvin lyhyesti</TableHead>
               <TableHead>Kuvaus</TableHead>
             </TableRow>

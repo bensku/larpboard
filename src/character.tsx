@@ -316,20 +316,34 @@ export const CharacterCard = ({ character }: { character: Character }) => {
 export const FastCharacterCard = ({
   character,
   groupTags,
+  showBlurb,
 }: {
   character: Character;
   groupTags: Tag[];
+  showBlurb?: boolean;
 }) => {
   return (
     <div className="flex flex-col gap-2">
       <h1 className="text-xl">
         <CharacterName character={character} />
       </h1>
-      <div className="flex">
+      <div className="flex gap-1">
+        <Tooltip>
+          <TooltipTrigger>
+            <div className="flex text-gray-700">
+              {character.writerName || 'tuntematon'}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>Hahmon kirjoittaja</TooltipContent>
+        </Tooltip>
         <BadgeGroup groups={groupTags} />
         <CharacterStatus char={character} className="flex-1 flex justify-end" />
       </div>
-      <TextEditor fragment={character.details} editable={false} />
+      {showBlurb ? (
+        <div>{character.blurb}</div>
+      ) : (
+        <TextEditor fragment={character.details} editable={false} />
+      )}
     </div>
   );
 };
