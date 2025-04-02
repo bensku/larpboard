@@ -240,7 +240,16 @@ const CreateContact = ({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
-        <Command>
+        <Command
+          // If name or workName contain query, show the character
+          filter={(_value, search, keywords) =>
+            keywords!
+              .map((name) => name.toLowerCase().includes(search))
+              .reduce((a, b) => a || b)
+              ? 1
+              : 0
+          }
+        >
           <CommandInput placeholder="Etsi hahmoja..." />
           <CommandList>
             <CommandEmpty>Hahmoja ei löytynyt.</CommandEmpty>
@@ -253,6 +262,7 @@ const CreateContact = ({
                     setOpen(false);
                     newContact(currentValue);
                   }}
+                  keywords={[character.name, character.workName]}
                 >
                   <CharacterName character={character} />
                 </CommandItem>
