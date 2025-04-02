@@ -233,13 +233,13 @@ const CreateContact = ({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-[200px] justify-between"
+          className="w-[320px] justify-between"
         >
           Uusi kontakti...
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-[320px] p-0">
         <Command
           // If name or workName contain query, show the character
           filter={(_value, search, keywords) =>
@@ -263,6 +263,7 @@ const CreateContact = ({
                     newContact(currentValue);
                   }}
                   keywords={[character.name, character.workName]}
+                  className="flex gap-1"
                 >
                   <CharacterName character={character} />
                 </CommandItem>
